@@ -24,23 +24,23 @@ namespace MTool{
             Precision_Int& operator+=(const Precision_Int&);
             Precision_Int& operator-=(const Precision_Int&);
             Precision_Int& operator*=(const Precision_Int&);
-/*          Precision_Int& operator/=(const Precision_Int&);
+            Precision_Int& operator/=(const Precision_Int&);
             Precision_Int& operator%=(const Precision_Int&);
-*/          Precision_Int& operator--();
+            Precision_Int& operator--();
             Precision_Int operator--(int);
             Precision_Int& operator++();
             Precision_Int operator++(int);
     //Bitwise operators
-/*            Precision_Int& operator&=(const Precision_Int&);
+    /*            Precision_Int& operator&=(const Precision_Int&);
             Precision_Int& operator|=(const Precision_Int&);
             Precision_Int& operator^=(const Precision_Int&);
             Precision_Int& operator<<=(const Precision_Int&);
             Precision_Int& operator>>=(const Precision_Int&);
-*/
+    */
     //Comparison operators
-        friend bool operator>
-            (const Precision_Int&,const Precision_Int&);
-        friend bool operator!(const Precision_Int&);
+            friend bool operator>
+                (const Precision_Int&,const Precision_Int&);
+            friend bool operator!(const Precision_Int&);
     //Read-only functions
             short sign()const;
             str string()const;
@@ -76,16 +76,16 @@ namespace MTool{
         (const Precision_Int&, const Precision_Int&);
     Precision_Int operator*
         (const Precision_Int&, const Precision_Int&);
-/*    Precision_Int operator/
+    Precision_Int operator/
         (const Precision_Int&, const Precision_Int&);
-	Precision_Int operator%
+    Precision_Int operator%
         (const Precision_Int&, const Precision_Int&);
-*/	Precision_Int operator-(const Precision_Int&);
+    Precision_Int operator-(const Precision_Int&);
     bool operator>(const Precision_Int&,const Precision_Int&);
     inline bool operator<(const Precision_Int&,const Precision_Int&);
-    //inline bool operator>=(const Precision_Int&,const Precision_Int&);
+    inline bool operator>=(const Precision_Int&,const Precision_Int&);
     inline bool operator<=(const Precision_Int&,const Precision_Int&);
-    //inline bool operator==(const Precision_Int&,const Precision_Int&);
+    inline bool operator==(const Precision_Int&,const Precision_Int&);
     inline bool operator!=(const Precision_Int&,const Precision_Int&);
     inline bool operator!(const Precision_Int&);
 
@@ -101,11 +101,10 @@ namespace MTool{
     double cotan(const Precision_Int&);
     //Note: make no arcFOO functions because their domains suggest
     //   no need for Precision_Int
-
-    Precision_Int operator"" _Precision_Int(char const *const);
-    Precision_Int operator"" _Precision_Int_E(char const *const);
-    Precision_Int operator"" _Precision_Int(longUI);
 }
+MTool::Precision_Int operator"" _Precision_Int(char const *const, size_t);
+MTool::Precision_Int operator"" _Precision_Int_E(char const *const, size_t);
+MTool::Precision_Int operator"" _Precision_Int(unsigned long long);
 /*********************************************
              End MTool Namespace
 *********************************************/

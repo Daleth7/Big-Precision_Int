@@ -4,4 +4,11 @@ until friday when I get back from work. Traveling jobs suck when you want to rel
 
 It's all cool. This is just soemthing to add to in our free time. Anyway, I already told you
 my idea for the division part: partial fractions. What ideas do you have?
+
+Actually, forget what I just wrote above. I feel completely stupid for
+overcomplicating things and jumping straight to partial fractions. I forgot
+the good ol' counter method. Unfortunately, my algorithms completely break
+down for extrememly large numbers, which I'm pretty sure stem from my
+convoluted operator+= function. I'm going to try to fix it soon.
+
 ~Daleth~

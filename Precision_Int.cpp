@@ -118,23 +118,27 @@ namespace MTool{
         __sign = signhold;
         return *this;
     }
-/*    Precision_Int& Precision_Int::operator/=(const Precision_Int& rhs)
+    Precision_Int& Precision_Int::operator/=(const Precision_Int& rhs)
     {
-        const auto start(__number.begin());
-        const size_t
-            num_of_sets(__number.size()),
-            dig_count
-        ;
-        using std::distance;
-        for(
-            auto liter(start);
-            distance(liter, start) < num_of_sets;
-            
-        ){
+        if(*this == rhs) return (*this = 1);
+        if(rhs == 0 || *this == 0) return (*this = 0);
+        Precision_Int toreturn(0), catalyst(rhs);
+        
+        while(catalyst <= this->Magnitude()){
+            catalyst += rhs.Magnitude();
+            ++toreturn;
         }
+        
+        toreturn.__sign *= this->__sign * rhs.__sign;
+        return (*this = toreturn);
     }
-	Precision_Int& Precision_Int::operator%=(const Precision_Int&);
-*/  Precision_Int& Precision_Int::operator--()
+    Precision_Int& Precision_Int::operator%=(const Precision_Int& rhs)
+    {
+        if(rhs == *this || rhs == 0) return (*this = 0);
+        else if(rhs <= *this) return *this;
+        return *this -= (*this/rhs)*rhs;
+    }
+    Precision_Int& Precision_Int::operator--()
         {return (*this += -1);}
     Precision_Int Precision_Int::operator--(int)
         {return (*this += -1)+1;}
@@ -166,13 +170,13 @@ namespace MTool{
     Precision_Int operator*
         (const Precision_Int& f, const Precision_Int& s)
     {return Precision_Int(f) *= s;}
-/*    Precision_Int operator/
+    Precision_Int operator/
         (const Precision_Int& f, const Precision_Int& s)
     {return (Precision_Int(f) /= s);}
-	Precision_Int operator%
+    Precision_Int operator%
         (const Precision_Int& f, const Precision_Int& s)
     {return (Precision_Int(f) %= s);}
-*/	Precision_Int operator-(const Precision_Int& f)
+    Precision_Int operator-(const Precision_Int& f)
         {return f * -1;}
 //Read-only functions
     short Precision_Int::sign()const
@@ -180,11 +184,8 @@ namespace MTool{
     str Precision_Int::string()const{
         if(*this == 0)   return "0";
         str toreturn(__sign == 1 ? "+" : "-");
-        for(
-            auto iter(__number.rbegin());
-            iter != __number.rend();
-            ++iter
-        ) toreturn += *iter;
+        for(auto iter(__number.size()); iter > 0; --iter)
+            toreturn += __number[iter-1];
         return toreturn;
     }
     str Precision_Int::scientific_notation(size_t prec)const{
@@ -236,26 +237,28 @@ namespace MTool{
     }
 
     bool operator>=(const Precision_Int& f,const Precision_Int& s){
-        if(
-            f.__sign < s.__sign ||
-            f.__number.size() < s.__number.size()
+        if(f.__sign < s.__sign) return false;
+        else if(f.__sign > s.__sign ) return true;
+        else if(
+            f.__sign == -1 &&
+            f.__number.size() > s.__number.size()
         ) return false;
         else if(
-            f.__sign > s.__sign ||
-            f.__number.size() > s.__number.size()
+            f.__sign == -1 &&
+            f.__number.size() < s.__number.size()
         ) return true;
-        else if(f.__number.back() < s.__number.back()) return false;
-        else if(f == s) return true;
-        else return true;
+        else if(f.__number.size() < s.__number.size()) return false;
+        else if(f.__number.size() > s.__number.size()) return true;
+        else{
+            for(size_t i(0); i < f.__number.size(); ++i)
+                if(f.__number[i] > s.__number[i]) return true;
+            return (f == s);
+        }
     }
     bool operator<=(const Precision_Int& f,const Precision_Int& s)
         {return (f < s || f == s);}
-    bool operator==(const Precision_Int& f,const Precision_Int& s){
-        if(f.__sign != s.__sign) return false;
-        else if(f.__number.size() != s.__number.size()) return false;
-        else if(f.__number.back() != s.__number.back()) return false;
-        else return true;
-    }
+    bool operator==(const Precision_Int& f,const Precision_Int& s)
+        {return f.__sign==s.__sign && f.__number==s.__number;}
     
     bool operator>(const Precision_Int& f,const Precision_Int& s)
         {return !(f <= s);}
@@ -300,34 +303,33 @@ namespace MTool{
         {return pow(cos(angle), -1);}
     double cotan(const Precision_Int& angle)
         {return pow(tan(angle), -1);}
-    
-    Precision_Int operator"" _Precision_Int(char const *const raw){
-        Precision_Int toreturn({0}, (raw[0] == '-') ? -1 : 0);
-        size_t i(0);
-        if(raw[0] == '-' || raw[0] == '+') ++i;
-        for(; i < sizeof(raw)/sizeof(char); ++i)
-            toreturn += (raw[i]-'0')*pow(10, i);
-        return toreturn;
-    }
-    Precision_Int operator"" _Precision_Int_E(char const *const raw){
-        std::string convert(raw);
-        size_t pos(convert.find('E'));
-        if(pos == str::npos) pos = convert.find('e');
-        if(pos == str::npos) pos  = convert.size();
-        Precision_Int toreturn({0}, (raw[0] == '-') ? -1 : 0);
-        size_t i(0);
-        if(raw[0] == '-' || raw[0] == '+') ++i;
-        for(; i < pos; ++i) toreturn += convert[i] - '0';
-        if(pos == convert.size()) return toreturn;
-//Temporarily use this method until mingw supports stoul or atoul
-        std::stringstream ss(convert.substr(pos+1));
-        size_t exp(0); ss >> exp;
-        toreturn *= pow(10, exp);
-        return toreturn;
-    }
-    Precision_Int operator"" _Precision_Int(longUI cooked)
-        {return Precision_Int(cooked);}
 }
+MTool::Precision_Int operator"" _Precision_Int(char const *const raw, size_t){
+    MTool::Precision_Int toreturn({0}, (raw[0] == '-') ? -1 : 0);
+    size_t i(0);
+    if(raw[0] == '-' || raw[0] == '+') ++i;
+    for(; i < sizeof(raw)/sizeof(char); ++i)
+        toreturn += (raw[i]-'0')*pow(10, i);
+    return toreturn;
+}
+MTool::Precision_Int operator"" _Precision_Int_E(char const *const raw, size_t){
+    std::string convert(raw);
+    size_t pos(convert.find('E'));
+    if(pos == std::string::npos) pos = convert.find('e');
+    if(pos == std::string::npos) pos  = convert.size();
+    MTool::Precision_Int toreturn({0}, (raw[0] == '-') ? -1 : 0);
+    size_t i(0);
+    if(raw[0] == '-' || raw[0] == '+') ++i;
+    for(; i < pos; ++i) toreturn += convert[i] - '0';
+    if(pos == convert.size()) return toreturn;
+//Temporarily use this method until mingw supports stoul or atoul
+    std::stringstream ss(convert.substr(pos+1));
+    size_t exp(0); ss >> exp;
+    toreturn *= pow(10, exp);
+    return toreturn;
+}
+MTool::Precision_Int operator"" _Precision_Int(unsigned long long cooked)
+    {return MTool::Precision_Int(cooked);}
 /*********************************************
              End MTool Namespace
 *********************************************/
