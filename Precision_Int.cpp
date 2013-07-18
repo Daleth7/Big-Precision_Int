@@ -5,8 +5,8 @@
 #include <sstream>
 #include <iomanip>
 #include <cctype>
-#include <bitset>
 #include <cmath>
+#include <algorithm>
 
 namespace MTool{
 /*********************************************************************
@@ -26,11 +26,9 @@ namespace MTool{
         for(size_t iter(0); iter < small.__number.size(); ++iter){
         //Actual "addition"
             short catalyst(
-                (big.__number[iter]-'0')*big.__sign
+                (big.__number[iter]-'0') + __carry
                 + (small.__number[iter]-'0')*small.__sign
-                + __carry
             );
-            __carry = 0;
         //"Borrow" a number if needed
             if(
                 catalyst < 0 &&
@@ -49,7 +47,8 @@ namespace MTool{
                 iter+1 == small.__number.size() &&
                 iter < big.__number.size()
             ) small.__number.push_back('0');
-        //If we reach the end of big.__number; switch to negative number
+        //If we reach the end of big.__number;
+        //   switch to negative number
             if(
                 catalyst < 0 &&
                 iter+1 == big.__number.size()
@@ -59,7 +58,8 @@ namespace MTool{
             }
         //Replace old number with sum without carry included
             big.__number[iter] = catalyst-__carry*__limit + '0';
-        //If we reach the end of big.__number but there is still a carry
+        //If we reach the end of big.__number but there
+        //   is still a carry
             if(iter+1 == big.__number.size()){
                 big.__number += __carry + '0';
                 break;
@@ -73,69 +73,50 @@ namespace MTool{
     }
     Precision_Int& Precision_Int::operator-=(const Precision_Int& rhs)
         {return (*this += (-rhs));}
+
     Precision_Int& Precision_Int::operator*=(const Precision_Int& rhs)
     {
-        if(rhs == -1){__sign *= -1; return *this;}
+        if(rhs == 0 || *this == 0) return *this = 0;
         else if(rhs == 1) return *this;
-        else if(rhs == 0) return (*this = 0);
-        short signhold(__sign*rhs.__sign);
-        std::vector<Precision_Int> addends({});
-        for(
-            auto iter(rhs.__number.begin());
-            iter != rhs.__number.end();
-            ++iter
-        ){
-            if(*iter == '0'){addends.push_back(0); continue;}
-            str addend(addends.size(), '0');
-            short carry(0);
-            for(auto titer(__number.begin());; ++titer){
-            //Check if last of digit sets but there is still a carry
-                if(titer == __number.end() && carry > 0){
-                    addend += (carry + '0');
-                    break;
-                }else if(titer == __number.end()) break;
-            //Actual "multiplication"
-                short catalyst((*titer-'0')*(*iter-'0')+carry);
-                if(catalyst >= __limit){
-                    carry = catalyst/__limit;
-                    catalyst %= __limit;
-                }else carry = 0;
-                addend += (catalyst+'0');
-            }
+        else if(*this == rhs) return *this = rhs;
+
+        short sign_hold(__sign * rhs.__sign);
+        Precision_Int
+            big = (this->Magnitude() > rhs.Magnitude())
+                ? this->Magnitude() : rhs.Magnitude(),
+            small = (this->Magnitude() > rhs.Magnitude())
+                ? rhs.Magnitude() : this->Magnitude()
+        ;
+        std::vector<Precision_Int> addends;
+        for(size_t i(0); i < small.__number.size(); ++i){
+            Precision_Int addend(0);
+            short operand(small.__number[i]-'0');
+            while(operand-- > 0) addend += big;
+            addend.__number.insert(0, i, '0');
             addends.push_back(addend);
         }
-        __number.clear();
-        __number.push_back('0');
-        size_t additionalsets(0);
-        for(auto iter(addends.begin()); iter != addends.end(); ++iter)
-        {
-            if(iter->__number.back() == '0' && iter->__number.size() > 1)
-                ++additionalsets;
-            else (*this) += *iter;
-        }
-        for(; additionalsets > 0; --additionalsets)
-            __number.insert(__number.begin(),'0');
-        __sign = signhold;
+        *this = 0;
+        for(const auto addend : addends) *this += addend;
+        this->__sign = sign_hold;
         return *this;
     }
     Precision_Int& Precision_Int::operator/=(const Precision_Int& rhs)
     {
         if(*this == rhs) return (*this = 1);
-        if(rhs == 0 || *this == 0) return (*this = 0);
-        Precision_Int toreturn(0), catalyst(rhs);
+        else if(rhs == 0 || this->Magnitude() < rhs.Magnitude())
+            return (*this = 0);
+        else if(rhs == 1) return *this;
         
-        while(catalyst <= this->Magnitude()){
-            catalyst += rhs.Magnitude();
-            ++toreturn;
-        }
+        Precision_Int toreturn(0);
+        while(*this >= rhs) *this -= rhs, ++toreturn;
         
-        toreturn.__sign *= this->__sign * rhs.__sign;
+        toreturn.__sign = this->__sign * rhs.__sign;
         return (*this = toreturn);
     }
     Precision_Int& Precision_Int::operator%=(const Precision_Int& rhs)
     {
         if(rhs == *this || rhs == 0) return (*this = 0);
-        else if(rhs <= *this) return *this;
+        else if(rhs > *this) return *this;
         return *this -= (*this/rhs)*rhs;
     }
     Precision_Int& Precision_Int::operator--()
@@ -149,7 +130,9 @@ namespace MTool{
 //Bitwise operators
 /*    Precision_Int& operator&=(const Precision_Int& rhs){
         const bool longer(__number.size() < rhs.__number.size());
-        size_t bit_num((longer ? __number.size() ? rhs.__number.siz)/2);
+        size_t bit_num(
+            (longer ? __number.size() ? rhs.__number.siz)/2
+        );
         if(longer ? (rhs.__number.size()%2) : (__number.size()%2))
             ++bit_num;
         std::bitset<bit_num> fbits, sbits;
@@ -157,9 +140,10 @@ namespace MTool{
     }
     Precision_Int& Precision_Int::operator|=(const Precision_Int& rhs)
     Precision_Int& Precision_Int::operator^=(const Precision_Int& rhs)
-    Precision_Int& Precision_Int::operator<<=(const Precision_Int& rhs)
-        {return *this *= 2;}
-    Precision_Int& Precision_Int::operator>>=(const Precision_Int& rhs)
+    Precision_Int& Precision_Int::operator<<=(const Precision_Int& rhs
+        ){return *this *= 2;}
+    Precision_Int& Precision_Int::operator>>=(const Precision_Int& rhs
+        ){return *this/2;}
 */
 	Precision_Int operator+
         (const Precision_Int& f, const Precision_Int& s)
@@ -201,7 +185,8 @@ namespace MTool{
         toreturn += ss.str();
         return toreturn;
     }
-    str Precision_Int::scientific_notation_with_spaces(size_t prec)const{
+    str Precision_Int::scientific_notation_with_spaces(size_t prec
+    )const{
         str toreturn(this->scientific_notation(prec));
         if(toreturn == "0") return toreturn;
         toreturn.insert(1, 1, ' ');
@@ -232,6 +217,7 @@ namespace MTool{
         __number(newnumber),
         __sign(newsign == 1 ? 1 : -1)
     {
+        std::reverse(__number.begin(), __number.end());
         for(size_t i(0); i < __number.size(); ++i)
             if(!isdigit(__number[i])) __number[i] = '0';
     }
@@ -250,8 +236,8 @@ namespace MTool{
         else if(f.__number.size() < s.__number.size()) return false;
         else if(f.__number.size() > s.__number.size()) return true;
         else{
-            for(size_t i(0); i < f.__number.size(); ++i)
-                if(f.__number[i] > s.__number[i]) return true;
+            for(size_t i(f.__number.size()-1); i > 0; --i)
+                if(f.__number[i] > s.__number[i-1]) return true;
             return (f == s);
         }
     }
@@ -269,7 +255,8 @@ namespace MTool{
     bool operator!(const Precision_Int& f)
         {return f == 0;}
     
-    Precision_Int Pow(const Precision_Int& b, const Precision_Int& exp){
+    Precision_Int Pow(const Precision_Int& b, const Precision_Int& exp
+    ){
         Precision_Int toreturn(b);
         for(auto e(exp); e > 1; --e)
             toreturn *= toreturn;
@@ -304,32 +291,43 @@ namespace MTool{
     double cotan(const Precision_Int& angle)
         {return pow(tan(angle), -1);}
 }
-MTool::Precision_Int operator"" _Precision_Int(char const *const raw, size_t){
-    MTool::Precision_Int toreturn({0}, (raw[0] == '-') ? -1 : 0);
+MTool::Precision_Int operator""
+    _Precision_Int(char const *const raw, size_t)
+{
     size_t i(0);
     if(raw[0] == '-' || raw[0] == '+') ++i;
-    for(; i < sizeof(raw)/sizeof(char); ++i)
-        toreturn += (raw[i]-'0')*pow(10, i);
-    return toreturn;
+    return MTool::Precision_Int(
+        std::string(raw).substr(i), (raw[0] == '-') ? -1 : 1
+    );
 }
-MTool::Precision_Int operator"" _Precision_Int_E(char const *const raw, size_t){
+MTool::Precision_Int operator""
+    _Precision_Int_E(char const *const raw, size_t)
+{
     std::string convert(raw);
     size_t pos(convert.find('E'));
     if(pos == std::string::npos) pos = convert.find('e');
-    if(pos == std::string::npos) pos  = convert.size();
-    MTool::Precision_Int toreturn({0}, (raw[0] == '-') ? -1 : 0);
-    size_t i(0);
-    if(raw[0] == '-' || raw[0] == '+') ++i;
-    for(; i < pos; ++i) toreturn += convert[i] - '0';
+    if(pos == std::string::npos) pos = convert.size();
+    size_t exp(0);
+    MTool::str part(convert.substr(
+        raw[0] == '-' || raw[0] == '+' ? 1 : 0,
+        pos
+    ));
+    for(size_t i(0); i < part.size(); ++i)
+        if(part[i] == '.') part.erase(i),
+            exp += part.substr(i-1).size();
+    MTool::Precision_Int toreturn(part, (raw[0] == '-') ? -1 : 1);
     if(pos == convert.size()) return toreturn;
-//Temporarily use this method until mingw supports stoul or atoul
+//Temporarily use this method until mingw supports
+//   stoul or atoul
     std::stringstream ss(convert.substr(pos+1));
-    size_t exp(0); ss >> exp;
+    ss >> pos;
+    exp += pos;
     toreturn *= pow(10, exp);
     return toreturn;
 }
-MTool::Precision_Int operator"" _Precision_Int(unsigned long long cooked)
-    {return MTool::Precision_Int(cooked);}
+MTool::Precision_Int operator""
+    _Precision_Int(unsigned long long cooked)
+{return MTool::Precision_Int(cooked);}
 /*********************************************
              End MTool Namespace
 *********************************************/
