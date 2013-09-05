@@ -1,0 +1,267 @@
+# depslib dependency file v1.0
+1378412402 source:c:\users\depes\dropbox\programming\precision\impl\precision_float_impl.cpp
+	"Precision_Float_Impl.h"
+	"Precision_Int.h"
+	"Precision_UInt.h"
+	"Precision_Math.h"
+	<sstream>
+
+1378085472 c:\users\depes\dropbox\programming\precision\impl\precision_float_impl.h
+	"Precision_Int.h"
+	"Precision_UInt.h"
+	"Shared_Constants.h"
+	<string>
+
+1378241029 c:\users\depes\dropbox\programming\precision\impl\precision_int_impl.h
+	<string>
+	"Shared_Constants.h"
+
+1378070721 source:c:\users\depes\dropbox\programming\precision\impl\precision_fract_impl.cpp
+	"Precision_Fract_Impl.h"
+	"Precision_Int.h"
+	"Precision_Float.h"
+	"Precision_Math.h"
+	<sstream>
+	<list>
+	<iterator>
+	<limits>
+
+1378070702 c:\users\depes\dropbox\programming\precision\impl\precision_fract_impl.h
+	"Precision_Int.h"
+	"Precision_Float.h"
+	<string>
+
+1378420642 source:c:\users\depes\dropbox\programming\precision\precision_sandbox.cpp
+	"Precision.h"
+	"Precision_Math.h"
+	<iostream>
+	<string>
+	<chrono>
+
+1378413046 source:c:\users\depes\dropbox\programming\precision\impl\precision_int_impl.cpp
+	"Precision_Int_Impl.h"
+	<vector>
+	<functional>
+	<algorithm>
+	<sstream>
+
+1378412974 source:c:\users\depes\dropbox\programming\precision\src\precision_float.cpp
+	"Precision_Float.h"
+	"Precision_Math.h"
+	<string>
+	<sstream>
+
+1378413425 c:\users\depes\dropbox\programming\precision\h\precision_float.h
+	"Impl/Precision_Float_Impl.h"
+	"Impl/Shared_Constants.h"
+	<utility>
+
+1378338316 source:c:\users\depes\dropbox\programming\precision\src\precision_int.cpp
+	"Precision_Int.h"
+	<sstream>
+
+1378413364 c:\users\depes\dropbox\programming\precision\h\precision_int.h
+	"Impl/Precision_Int_Impl.h"
+	<utility>
+
+1377901973 c:\users\depes\dropbox\programming\precision\impl\precision_int_impl.inl
+	<vector>
+
+1378421120 source:c:\users\depes\dropbox\programming\precision\src\precision_math.cpp
+	"Precision_Math.h"
+	"Precision_Int.h"
+	"Precision_Float.h"
+	"Constants.h"
+	<sstream>
+	<cmath>
+	<list>
+	<iterator>
+	<map>
+
+1378421021 c:\users\depes\dropbox\programming\precision\h\precision_math.h
+	"Precision_Float.h"
+	"Precision_Int.h"
+	"Precision_Math.inl"
+
+1377905607 c:\users\depes\dropbox\programming\precision\src\precision_math.inl
+	<vector>
+
+1374181956 c:\users\depes\dropbox\programming\precision\h\constants.h
+	<cstddef>
+
+1378357290 source:c:\users\depes\dropbox\programming\precision\src\precision_uint.cpp
+	"Precision_UInt.h"
+
+1378357228 c:\users\depes\dropbox\programming\precision\h\precision_uint.h
+	"Precision_Int.h"
+	<sstream>
+	<utility>
+
+1377986681 c:\users\depes\dropbox\programming\precision\h\shared_constants.h
+
+1378413421 c:\users\depes\dropbox\programming\precision\h\precision_fract.h
+	"Impl/Precision_Fract_Impl.h"
+	"Impl/Shared_Constants.h"
+
+1377944123 c:\users\depes\dropbox\programming\precision\precision.h
+	"H/Precision_Int.h"
+	"H/Precision_UInt.h"
+	"H/Precision_Float.h"
+	"H/Precision_UFloat.h"
+	"H/Precision_Fract.h"
+
+1378414975 c:\users\depes\dropbox\programming\precision\h\precision_ufloat.h
+	"Precision_Float.h"
+	"Precision_UInt.h"
+	"Impl/Shared_Constants.h"
+	<utility>
+	<iostream>
+
+1378246237 source:c:\users\depes crystalline\desktop\dropbox\programming\precision\impl\precision_float_impl.cpp
+	"Precision_Float_Impl.h"
+	"Precision_Int.h"
+	"Precision_UInt.h"
+	"Precision_Math.h"
+	<sstream>
+	<iostream>
+
+1378081872 c:\users\depes crystalline\desktop\dropbox\programming\precision\impl\precision_float_impl.h
+	"Precision_Int.h"
+	"Precision_UInt.h"
+	"Shared_Constants.h"
+	<string>
+
+1378237338 c:\users\depes crystalline\desktop\dropbox\programming\precision\h\precision_int.h
+	"Precision_Int_Impl.h"
+
+1378237429 c:\users\depes crystalline\desktop\dropbox\programming\precision\impl\precision_int_impl.h
+	<string>
+	"Shared_Constants.h"
+
+1377983081 c:\users\depes crystalline\desktop\dropbox\programming\precision\h\shared_constants.h
+
+1378237357 c:\users\depes crystalline\desktop\dropbox\programming\precision\h\precision_uint.h
+	"Precision_Int_Impl.h"
+	<sstream>
+
+1378249354 c:\users\depes crystalline\desktop\dropbox\programming\precision\h\precision_math.h
+	"Precision_Float.h"
+	"Precision_Int.h"
+	"Precision_Math.inl"
+
+1378159664 c:\users\depes crystalline\desktop\dropbox\programming\precision\h\precision_float.h
+	"Precision_Float_Impl.h"
+	"Shared_Constants.h"
+
+1377902007 c:\users\depes crystalline\desktop\dropbox\programming\precision\src\precision_math.inl
+	<vector>
+
+1378067121 source:c:\users\depes crystalline\desktop\dropbox\programming\precision\impl\precision_fract_impl.cpp
+	"Precision_Fract_Impl.h"
+	"Precision_Int.h"
+	"Precision_Float.h"
+	"Precision_Math.h"
+	<sstream>
+	<list>
+	<iterator>
+	<limits>
+
+1378067102 c:\users\depes crystalline\desktop\dropbox\programming\precision\impl\precision_fract_impl.h
+	"Precision_Int.h"
+	"Precision_Float.h"
+	<string>
+
+1378244314 source:c:\users\depes crystalline\desktop\dropbox\programming\precision\impl\precision_int_impl.cpp
+	"Precision_Int_Impl.h"
+	<vector>
+	<functional>
+	<algorithm>
+	<sstream>
+
+1377902819 source:c:\users\depes crystalline\desktop\dropbox\programming\precision\src\precision_float.cpp
+	"Precision_Float.h"
+	"Precision_Math.h"
+	<string>
+	<sstream>
+
+1378067518 source:c:\users\depes crystalline\desktop\dropbox\programming\precision\src\precision_int.cpp
+	"Precision_Int.h"
+	<sstream>
+
+1378249651 source:c:\users\depes crystalline\desktop\dropbox\programming\precision\src\precision_math.cpp
+	"Precision_Math.h"
+	"Precision_Int.h"
+	"Precision_Float.h"
+	"Constants.h"
+	<sstream>
+	<cmath>
+
+1374178356 c:\users\depes crystalline\desktop\dropbox\programming\precision\h\constants.h
+	<cstddef>
+
+1377941050 source:c:\users\depes crystalline\desktop\dropbox\programming\precision\src\precision_uint.cpp
+
+1378274329 source:c:\users\depes crystalline\desktop\dropbox\programming\precision\precision_sandbox.cpp
+	"Precision.h"
+	"Precision_Math.h"
+	<iostream>
+	<string>
+	<chrono>
+
+1377940523 c:\users\depes crystalline\desktop\dropbox\programming\precision\precision.h
+	"H/Precision_Int.h"
+	"H/Precision_UInt.h"
+	"H/Precision_Float.h"
+	"H/Precision_UFloat.h"
+	"H/Precision_Fract.h"
+
+1378189612 c:\users\depes crystalline\desktop\dropbox\programming\precision\h\precision_ufloat.h
+	"Precision_Float.h"
+	"Precision_UInt.h"
+	"Shared_Constants.h"
+
+1377940369 c:\users\depes crystalline\desktop\dropbox\programming\precision\h\precision_fract.h
+	"Precision_Fract_Impl.h"
+	"Shared_Constants.h"
+
+1378415651 c:\users\depes\dropbox\programming\precision\h\impl\precision_int_impl.h
+	<string>
+	"Shared_Constants.h"
+
+1378415660 c:\users\depes\dropbox\programming\precision\h\impl\precision_float_impl.h
+	"Precision_Int.h"
+	"Precision_UInt.h"
+	"Shared_Constants.h"
+	<string>
+
+1378070702 c:\users\depes\dropbox\programming\precision\h\impl\precision_fract_impl.h
+	"Precision_Int.h"
+	"Precision_Float.h"
+	<string>
+
+1378415566 source:c:\users\depes\dropbox\programming\precision\h\impl\precision_float_impl.cpp
+	"Precision_Float_Impl.h"
+	"Precision_Int.h"
+	"Precision_UInt.h"
+	"Precision_Math.h"
+	<sstream>
+
+1378415711 c:\users\depes\dropbox\programming\precision\h\impl\shared_constants.h
+
+1378070721 source:c:\users\depes\dropbox\programming\precision\h\impl\precision_fract_impl.cpp
+	"Precision_Fract_Impl.h"
+	"Precision_Int.h"
+	"Precision_Float.h"
+	"Precision_Math.h"
+	<sstream>
+	<list>
+	<iterator>
+	<limits>
+
+1378413046 source:c:\users\depes\dropbox\programming\precision\h\impl\precision_int_impl.cpp
+	"Precision_Int_Impl.h"
+	<vector>
+	<functional>
+	<algorithm>
+	<sstream>
+

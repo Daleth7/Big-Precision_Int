@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="Precision_SandBox" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/Precision_SandBox" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-std=c++11" />
+					<Add option="-g" />
+					<Add directory="Impl" />
+					<Add directory="Src" />
+				</Compiler>
+				<ResourceCompiler>
+					<Add directory="Impl" />
+					<Add directory="Src" />
+				</ResourceCompiler>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/Precision_SandBox" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add option="-fexceptions" />
+			<Add directory="Impl" />
+			<Add directory="Src" />
+			<Add directory="H" />
+		</Compiler>
+		<Linker>
+			<Add directory="Impl" />
+			<Add directory="Src" />
+			<Add directory="H" />
+		</Linker>
+		<Unit filename="H/Precision_Float.h" />
+		<Unit filename="H/Precision_Fract.h" />
+		<Unit filename="H/Precision_Int.h" />
+		<Unit filename="H/Precision_Math.h" />
+		<Unit filename="H/Precision_UFloat.h" />
+		<Unit filename="H/Precision_UInt.h" />
+		<Unit filename="H/Shared_Constants.h" />
+		<Unit filename="Impl/Precision_Float_Impl.cpp" />
+		<Unit filename="Impl/Precision_Float_Impl.h" />
+		<Unit filename="Impl/Precision_Fract_Impl.cpp" />
+		<Unit filename="Impl/Precision_Fract_Impl.h" />
+		<Unit filename="Impl/Precision_Int_Impl.cpp" />
+		<Unit filename="Impl/Precision_Int_Impl.h" />
+		<Unit filename="Precision.h" />
+		<Unit filename="Precision_SandBox.cpp" />
+		<Unit filename="Src/Precision_Float.cpp" />
+		<Unit filename="Src/Precision_Int.cpp" />
+		<Unit filename="Src/Precision_Math.cpp" />
+		<Unit filename="Src/Precision_Math.inl" />
+		<Unit filename="Src/Precision_UInt.cpp" />
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+			<lib_finder disable_auto="1" />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>
