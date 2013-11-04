@@ -14,8 +14,6 @@
 				<Compiler>
 					<Add option="-std=c++11" />
 					<Add option="-g" />
-					<Add directory="Impl" />
-					<Add directory="Src" />
 				</Compiler>
 				<ResourceCompiler>
 					<Add directory="Impl" />
@@ -36,30 +34,29 @@
 			</Target>
 		</Build>
 		<Compiler>
+			<Add option="-std=c++11" />
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
-			<Add directory="Impl" />
 			<Add directory="Src" />
 			<Add directory="H" />
 		</Compiler>
 		<Linker>
-			<Add directory="Impl" />
 			<Add directory="Src" />
 			<Add directory="H" />
 		</Linker>
+		<Unit filename="H/Impl/Precision_Float_Impl.cpp" />
+		<Unit filename="H/Impl/Precision_Float_Impl.h" />
+		<Unit filename="H/Impl/Precision_Fract_Impl.cpp" />
+		<Unit filename="H/Impl/Precision_Fract_Impl.h" />
+		<Unit filename="H/Impl/Precision_Int_Impl.cpp" />
+		<Unit filename="H/Impl/Precision_Int_Impl.h" />
+		<Unit filename="H/Impl/Shared_Constants.h" />
 		<Unit filename="H/Precision_Float.h" />
 		<Unit filename="H/Precision_Fract.h" />
 		<Unit filename="H/Precision_Int.h" />
 		<Unit filename="H/Precision_Math.h" />
 		<Unit filename="H/Precision_UFloat.h" />
 		<Unit filename="H/Precision_UInt.h" />
-		<Unit filename="H/Shared_Constants.h" />
-		<Unit filename="Impl/Precision_Float_Impl.cpp" />
-		<Unit filename="Impl/Precision_Float_Impl.h" />
-		<Unit filename="Impl/Precision_Fract_Impl.cpp" />
-		<Unit filename="Impl/Precision_Fract_Impl.h" />
-		<Unit filename="Impl/Precision_Int_Impl.cpp" />
-		<Unit filename="Impl/Precision_Int_Impl.h" />
 		<Unit filename="Precision.h" />
 		<Unit filename="Precision_SandBox.cpp" />
 		<Unit filename="Src/Precision_Float.cpp" />

@@ -28,8 +28,31 @@ namespace Precision{
         
         return toreturn;
     }
-    Int Factorial(const Int& start)
-        {return (start > 1 ? start*Factorial(start-1) : 1);}
+
+    Int Factorial_Range(const Int& f, const Int& s){
+        if(s == f)
+            return s;
+        else if(s < f)
+            return 1;
+        else if(f+1 == s)
+            return f*s;
+        else
+            return
+                Factorial_Range(f, (f+s)/2)
+                * Factorial_Range((f+s)/2+1, s)
+            ;
+    }
+
+    Int Factorial(const Int& start){
+        return Factorial_Range(2, start);
+/*
+        Int toreturn(1), counter(start);
+        while(counter > 1)
+            toreturn *= counter--;
+        return toreturn;
+*/
+    }
+
     Int Log(const Int& base, const Int& result){
         if(base == result) return 1;
         else if(base > result) return 0;
@@ -38,17 +61,18 @@ namespace Precision{
             ++toreturn, testee *= base;
         return toreturn;
     }
-    Int GCF(const Int& f, const Int& s){
-        Int
-            max(f > s ? f : s),
-            toreturn(1)
-        ;
-        
-        while(--max > 0)
-            if((f % max == 0) && (s % max == 0))
-                return max;
-
-    return 0;
+    Int GCF(Int toreturn, Int quotient){
+    //Euclid's Algorithm:
+    //  http://en.wikipedia.org/wiki/
+    //  Greatest_common_divisor
+    //  #Using_Euclid.27s_algorithm
+        while(true){
+            if(quotient % toreturn == 0) break;
+            Int hold(toreturn);
+            toreturn = quotient % toreturn;
+            quotient = hold;
+        }
+        return toreturn;
     }
     //sin needs to make an internal copy anyway, so pass by value
     double Sin(Int angle){
@@ -185,7 +209,7 @@ namespace Precision{
         toconvert = toconvert.magnitude();
         while(toconvert > 0){
             size_t i( toconvert.count_digits() );
-        //key1 accesses words or order 10, like "thousand"
+        //key1 accesses words of order 10, like "thousand"
         //key2 accesses the single digits words, like "one"
             Int key1(Pow(k_ten, i-1)), key2(toconvert / key1);
             
@@ -236,6 +260,25 @@ namespace Precision{
         {return f ^ s;}
     Float fPow(const Float& f, const Float& s)
         {return f ^ s;}
+
+    Float ln(const Float& res, size_t prec){
+        const bool inverted(res.magnitude() > 1);
+        Float
+            toreturn(0),
+            _x(inverted ? (1 / res) : res)
+        ;
+        for(size_t i(1); i < (prec ? prec : 100); ++i){
+            toreturn
+                += (i % 2 == 1 ? 1 : -1)
+                * ( (_x - 1) ^ i )
+                / i
+            ;
+        }
+        if(inverted)
+            toreturn.negate();
+        return toreturn;
+    }
+
     Float Remainder(const Float& f, const Float& s)
         {return f.remainder(s);}
 /* Support only after studying mathematical gamma function for factorials

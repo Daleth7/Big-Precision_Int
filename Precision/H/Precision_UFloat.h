@@ -7,7 +7,6 @@
 
 #include <utility>
 
-#include <iostream>
 namespace Precision{
     class UFloat{
         public:
@@ -18,121 +17,129 @@ namespace Precision{
             using ld        = Float::ld;
             using lli       = Float::lli;
             using diglist   = Float::diglist;
+            using Size_Type = Float::Size_Type;
     //Arithmetic operators
-            inline UFloat& operator+=(const UFloat& rhs){
+            UFloat& operator+=(const UFloat& rhs){
                 m_fbase += rhs.m_fbase;
                 if(m_fbase.sign() < 0)
                     m_fbase = 0;
                 return *this;
             }
 
-            inline UFloat& operator-=(const UFloat& rhs){
+            UFloat& operator-=(const UFloat& rhs){
                 m_fbase -= rhs.m_fbase;
                 if(m_fbase.sign() < 0)
                     m_fbase = 0;
                 return *this;
             }
 
-            inline UFloat& operator*=(const UFloat& rhs)
+            UFloat& operator*=(const UFloat& rhs)
                 {return m_fbase *= rhs.m_fbase, *this;}
 
-            inline UFloat& operator/=(const UFloat& rhs)
+            UFloat& operator/=(const UFloat& rhs)
                 {return m_fbase /= rhs.m_fbase, *this;}
 
-            inline UFloat& operator%=(const UFloat& rhs)
+            UFloat& operator%=(const UFloat& rhs)
                 {return m_fbase %= rhs.m_fbase, *this;}
 
-            inline UFloat& operator--()
+            UFloat& operator--()
                 {return --m_fbase, *this;}
 
-            inline UFloat operator--(int)
+            UFloat operator--(int)
                 {return UFloat(m_fbase--);}
 
-            inline UFloat& operator++()
+            UFloat& operator++()
                 {return ++m_fbase, *this;}
 
-            inline UFloat operator++(int)
+            UFloat operator++(int)
                 {return UFloat(m_fbase++);}
 
                 //Returns the power of, not XOR
-            inline UFloat& operator^=(const Integer& rhs)
+            UFloat& operator^=(const Integer& rhs)
                 {return m_fbase ^= rhs, *this;}
 
-            inline UFloat& operator^=(const UFloat& rhs)
+            UFloat& operator^=(const UFloat& rhs)
                 {return m_fbase ^= rhs.m_fbase, *this;}
 
     //Read-only functions
-            inline Str str(
-                size_t inPrec = 0,
+            Str str(
+                Size_Type inPrec = 0,
                 bool inShowFull = false
             )const{return m_fbase.str(inPrec, inShowFull);}
 
+            bool even()const
+                {return m_fbase.even();}
+
+            bool odd()const
+                {return m_fbase.odd();}
+
         //Set the precision through parameter
-            inline Str sci_note(
-                size_t inPrec = 0,
+            Str sci_note(
+                Size_Type inPrec = 0,
                 bool inShowFull = false
             )const{return m_fbase.sci_note(inPrec, inShowFull);}
 
-            inline Str sci_note_w_spaces(
-                size_t inPrec = 0,
+            Str sci_note_w_spaces(
+                Size_Type inPrec = 0,
                 bool inShowFull = false
             )const{return m_fbase.sci_note_w_spaces(inPrec, inShowFull);}
 
-            inline size_t count_digits()const
+            Size_Type count_digits()const
                 {return m_fbase.count_digits();}
 
-            inline size_t count_left_digits()const
+            Size_Type count_left_digits()const
                 {return m_fbase.count_left_digits();}
 
-            inline size_t count_right_digits()const
+            Size_Type count_right_digits()const
                 {return m_fbase.count_right_digits();}
 
-            inline size_t precision()const
+            Size_Type precision()const
                 {return m_fbase.precision();}
 
-            inline short compare(const UFloat& s)const
+            short compare(const UFloat& s)const
                 {return m_fbase.compare(s.m_fbase);}
 
-            inline Integer integer()const
+            Integer integer()const
                 {return m_fbase.integer();}
 
-            inline bool show_full()const
+            bool show_full()const
                 {return m_fbase.show_full();}
 
-            inline UFloat remainder(const UFloat& s)const
+            UFloat remainder(const UFloat& s)const
                 {return UFloat(m_fbase.remainder(s.m_fbase));}
 
-            inline Float base()const
+            Float base()const
                 {return m_fbase;}
             
-            inline Float operator-()const
+            Float operator-()const
                 {return -m_fbase;}
 
     //Other modifers
-            inline bool show_full(bool inFlag)
+            bool show_full(bool inFlag)
                 {return m_fbase.show_full(inFlag);}
 
                 //Multiplies integer by a power of ten
-            inline void shift(lli tens_exp)
+            void shift(lli tens_exp)
                 {m_fbase.shift(tens_exp);}
 
     //Overload cast operators
-            inline explicit operator Integer() const
+            explicit operator Integer() const
                 {return static_cast<Integer>(m_fbase);}
 
-            inline explicit operator UInteger() const
+            explicit operator UInteger() const
                 {return static_cast<Integer>(m_fbase);}
 
     //Constructors and destructor
-            UFloat(ld inFP = 0.0, size_t inPrec = k_default_prec)
+            UFloat(ld inFP = 0.0, Size_Type inPrec = k_default_prec)
                 : m_fbase(inFP, inPrec)
             {}
 
             UFloat(
                 const diglist& inImage,
-                size_t inPrec = k_default_prec
+                Size_Type inPrec = k_default_prec
             )
-                : m_fbase(inImage[0] == '-' || inImage[0] == '+'
+                : m_fbase(
+                    inImage[0] == '-' || inImage[0] == '+'
                         ? inImage.substr(1) : inImage,
                     inPrec
                 )
@@ -140,7 +147,7 @@ namespace Precision{
 
             explicit UFloat(
                 const Integer& inInt,
-                size_t inPrec = k_default_prec
+                Size_Type inPrec = k_default_prec
             )
                 : m_fbase(inInt, inPrec)
             {
@@ -150,7 +157,7 @@ namespace Precision{
 
             explicit UFloat(
                 Integer&& inInt,
-                size_t inPrec = k_default_prec
+                Size_Type inPrec = k_default_prec
             )
                 : m_fbase(std::move(inInt), inPrec)
             {
@@ -160,7 +167,7 @@ namespace Precision{
 
             explicit UFloat(
                 const UInteger& inInt,
-                size_t inPrec = k_default_prec
+                Size_Type inPrec = k_default_prec
             )
                 : m_fbase(inInt, inPrec)
             {
@@ -170,7 +177,7 @@ namespace Precision{
 
             explicit UFloat(
                 UInteger&& inInt,
-                size_t inPrec = k_default_prec
+                Size_Type inPrec = k_default_prec
             )
                 : m_fbase(std::move(inInt), inPrec)
             {

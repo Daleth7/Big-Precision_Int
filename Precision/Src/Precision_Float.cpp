@@ -17,7 +17,7 @@ Precision::Float operator"" _Precision_Float_E(
 ){
     using Str = Precision::Float::Str;
     const Str convert(raw);
-    size_t e_pos(convert.find('E'));
+    Precision::Float::Size_Type e_pos(convert.find('E'));
     if(e_pos == Str::npos) e_pos = convert.find('e');
     if(e_pos == Str::npos)
         return Precision::Float(Str(raw));

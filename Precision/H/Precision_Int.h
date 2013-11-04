@@ -15,97 +15,110 @@ namespace Precision{
             using diglist   = Impl_Int_::diglist;
             using digit     = Impl_Int_::digit;
             using Sign      = Impl_Int_::Sign;
+            using Size_Type = Impl_Int_::Size_Type;
     //Arithmetic operators
-            inline Int& operator+=(const Int& rhs)
+            Int& operator+=(const Int& rhs)
                 {return m_base += rhs.m_base, *this;}
 
-            inline Int& operator-=(const Int& rhs)
+            Int& operator-=(const Int& rhs)
                 {return m_base -= rhs.m_base, *this;}
 
-            inline Int& operator*=(const Int& rhs)
+            Int& operator*=(const Int& rhs)
                 {return m_base *= rhs.m_base, *this;}
 
-            inline Int& operator/=(const Int& rhs)
+            Int& operator/=(const Int& rhs)
                 {return m_base /= rhs.m_base, *this;}
 
-            inline Int& operator%=(const Int& rhs)
+            Int& operator%=(const Int& rhs)
                 {return m_base %= rhs.m_base, *this;}
 
-            inline Int& operator--()
+            Int& operator--()
                 {return --m_base, *this;}
-                
-            inline Int operator--(int)
+
+            Int operator--(int)
                 {return Int(m_base--);}
-                
-            inline Int& operator++()
+
+            Int& operator++()
                 {return ++m_base, *this;}
-                
-            inline Int operator++(int)
+
+            Int operator++(int)
                 {return Int(m_base++);}
     //Bitwise operators
-            inline Int& operator&=(const Int& rhs)
+            Int& operator&=(const Int& rhs)
                 {return m_base &= rhs.m_base, *this;}
-            
-            inline Int& operator|=(const Int& rhs)
+
+            Int& operator|=(const Int& rhs)
                 {return m_base |= rhs.m_base, *this;}
-            
-            inline Int& operator^=(const Int& rhs)
+
+            Int& operator^=(const Int& rhs)
                 {return m_base ^= rhs.m_base, *this;}
 
-            inline Int& operator<<=(const Int& rhs)
+            Int& operator<<=(const Int& rhs)
                 {return m_base <<= rhs.m_base, *this;}
 
-            inline Int& operator>>=(const Int& rhs)
+            Int& operator>>=(const Int& rhs)
                 {return m_base >>= rhs.m_base, *this;}
 
     //Read-only functions
-            inline Sign sign()const
+            Sign sign()const
                 {return m_base.sign();}
 
-            inline Str str()const
+            bool even()const
+                {return m_base.even();}
+
+            bool odd()const
+                {return m_base.odd();}
+
+            Str str()const
                 {return m_base.str();}
 
             //Set the precision through parameter
-            inline Str sci_note(size_t precision=k_display_prec)const
+            Str sci_note(Size_Type precision=k_display_prec)const
                 {return m_base.sci_note(precision);}
 
-            inline Str sci_note_w_spaces(size_t precision=k_display_prec)const
+            Str sci_note_w_spaces(Size_Type precision=k_display_prec)const
                 {return m_base.sci_note_w_spaces(precision);}
 
-            inline Int magnitude()const
+            Int magnitude()const
                 {return Int(m_base.magnitude());}
 
-            inline size_t count_digits()const
+            Size_Type count_digits()const
                 {return m_base.count_digits();}
 
-            inline short compare(const Int& s)const
+            short compare(const Int& s)const
                 {return m_base.compare(s.m_base);}
 
-            inline Int operator-()const
+            Int operator-()const
                 {return Int(m_base*-1);}
-                
+
                 //Does not work for ~0
-            inline Int operator~()const
+            Int operator~()const
                 {return Int(~m_base);}
-    
+
     //Other modifiers
                 //Multiplies integer by a power of ten
-            inline void shift(lli tens_exp)
+            void shift(lli tens_exp)
                 {m_base.shift(tens_exp);}
-    
+
+            void sign(Sign newsign)
+                {m_base.sign(newsign);}
+
+            void negate()
+                {m_base.negate();}
+
     //Constructors and destructor
             Int(lli inInt = 0)
                 : m_base(inInt)
             {}
-            
+
             Int(const diglist& inImage)
                 : m_base(inImage)
             {}
-            
+
             explicit Int(const Impl_Int_& inInt)
                 : m_base(inInt)
             {}
-            
+
             explicit Int(Impl_Int_&& inInt)
                 : m_base(std::move(inInt))
             {}

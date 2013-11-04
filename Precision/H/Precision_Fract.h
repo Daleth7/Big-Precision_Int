@@ -14,155 +14,182 @@ namespace Precision{
             using ld        = Impl_Fract_::ld;
             using lli       = Impl_Fract_::lli;
             using ulli      = Impl_Fract_::ulli;
+            using Size_Type = Impl_Fract_::Size_Type;
     //Arithmetic operators
-            inline Fract& operator+=(const Fract& rhs)
+            Fract& operator+=(const Fract& rhs)
                 {return m_base += rhs.m_base, *this;}
 
-            inline Fract& operator-=(const Fract& rhs)
+            Fract& operator-=(const Fract& rhs)
                 {return m_base -= rhs.m_base, *this;}
 
-            inline Fract& operator*=(const Fract& rhs)
+            Fract& operator*=(const Fract& rhs)
                 {return m_base *= rhs.m_base, *this;}
 
-            inline Fract& operator/=(const Fract& rhs)
+            Fract& operator/=(const Fract& rhs)
                 {return m_base /= rhs.m_base, *this;}
 
-            inline Fract& operator%=(const Fract& rhs)
+            Fract& operator%=(const Fract& rhs)
                 {return m_base %= rhs.m_base, *this;}
 
-            inline Fract& operator--()
+            Fract& operator--()
                 {return --m_base, *this;}
 
-            inline Fract operator--(int)
-                {return m_base--;}
+            Fract operator--(int)
+                {return Fract(m_base--);}
 
-            inline Fract& operator++()
+            Fract& operator++()
                 {return ++m_base, *this;}
 
-            inline Fract operator++(int)
-                {return m_base++;}
+            Fract operator++(int)
+                {return Fract(m_base++);}
 
-            inline Fract operator-()const
-                {return -m_base;}
+            Fract operator-()const
+                {return Fract(-m_base);}
 
     //Overloaded operators with new meanings
                 //Invert the fraction
-            inline Fract operator~()const
-                {return ~m_base;}
+            Fract operator~()const
+                {return Fract(~m_base);}
                 
                 //Raise the fraction to the power of
-            inline Fract operator^=(const Integer& rhs)
+            Fract operator^=(const Integer& rhs)
                 {return m_base ^= rhs, *this;}
-                
-            inline Fract operator^=(const Fract& rhs)
+/***************Function below is currently incomplete*******************/
+            Fract operator^=(const Fract& rhs)
                 {return m_base ^= rhs.m_base, *this;}
                 
     //Read-only functions
-            inline Sign sign()const
+            Sign sign()const
                 {return m_base.sign();}
+
+            bool even()const
+                {return m_base.even();}
+
+            bool odd()const
+                {return m_base.odd();}
                 
-            inline Integer numerator()const
+            Integer numerator()const
                 {return m_base.numerator();}
                 
-            inline Integer denominator()const
+            Integer denominator()const
                 {return m_base.denominator();}
                 
-            inline Str str()const
+            Str str()const
                 {return m_base.str();}
                 
-            inline Str mixed()const
+            Str mixed()const
                 {return m_base.mixed();}
                 
-        //Set the precision through parameter
-            inline Fract magnitude()const
-                {return m_base.magnitude();}
+            Fract magnitude()const
+                {return Fract(m_base.magnitude());}
                 
-            inline size_t precision()const
+            Size_Type precision()const
                 {return m_base.precision();}
                 
-            inline short compare(const Fract& s)const
+            short compare(const Fract& s)const
                 {return m_base.compare(s.m_base);}
                 
         //Following two pairs are merely different names for the same thing
-            inline Integer whole()const
+            Integer whole()const
                 {return static_cast<Integer>(m_base);}
                 
-            inline Float decimal()const
+            Float decimal()const
                 {return static_cast<Float>(m_base);}
                 
-            inline Integer integer()const
+            Integer integer()const
                 {return static_cast<Integer>(m_base);}
                 
-            inline Float floating_point()const
+            Float floating_point()const
                 {return static_cast<Float>(m_base);}
                 
-            inline Integer gcd(const Fract& s)const
+            Integer gcd(const Fract& s)const
                 {return m_base.gcd(s.m_base);}
 
-            inline Fract remainder(const Fract& s)const
-                {return m_base.remainder(s.m_base);}
+            Fract remainder(const Fract& s)const
+                {return Fract(m_base.remainder(s.m_base));}
+
+            Fract inverse()const
+                {return Fract(m_base.inverse());}
                 
     //Other modifiers
-            inline void precision(size_t inPrec)
+            void precision(Size_Type inPrec)
                 {m_base.precision(inPrec);}
+
+            Fract& invert()
+                {return m_base.invert(), *this;}
+
+            void sign(Sign newsign)
+                {m_base.sign(newsign);}
+
+            void negate()
+                {m_base.negate();}
                 
     //Overload cast operators
-            inline explicit operator Integer() const
+            explicit operator Integer() const
                 {return static_cast<Integer>(m_base);}
                 
-            inline explicit operator Float() const
+            explicit operator Float() const
                 {return static_cast<Float>(m_base);}
                 
     //Constructors and destructor
-            Fract(ld inFP = 0.0, size_t inPrec = k_default_prec)
+            Fract(ld inFP = 0.0, Size_Type inPrec = k_default_prec)
                 : m_base(inFP, inPrec)
             {}
             
             Fract(
                 const Str& inImage,
-                Sign inSign = 1,
-                size_t inPrec = k_default_prec
+                Size_Type inPrec = k_default_prec
             )
-                : m_base(inImage, inSign, inPrec)
+                : m_base(inImage, inPrec)
             {}
             
-            Fract(const Integer& inWhole, size_t inPrec = k_default_prec)
+            explicit Fract(
+                const Integer& inWhole,
+                Size_Type inPrec = k_default_prec
+            )
                 : m_base(inWhole, inPrec)
             {}
             
-            Fract(Integer&& inWhole, size_t inPrec = k_default_prec)
+            explicit Fract(
+                Integer&& inWhole,
+                Size_Type inPrec = k_default_prec
+            )
                 : m_base(std::move(inWhole), inPrec)
             {}
             
-            Fract(const Float& inFP)
+            explicit Fract(const Float& inFP)
                 : m_base(inFP)
             {}
             
-            Fract (Float&& inFP)
+            explicit Fract (Float&& inFP)
                 : m_base(std::move(inFP))
             {}
             
-            Fract(
+            explicit Fract(
                 const Integer& inNumer,
                 const Integer& inDenom,
-                size_t inPrec = k_default_prec
+                Size_Type inPrec = k_default_prec
             )
                 : m_base(inNumer, inDenom, inPrec)
             {}
             
-            Fract(
+            explicit Fract(
                 Integer&& inNumer,
                 Integer&& inDenom,
-                size_t inPrec = k_default_prec
+                Size_Type inPrec = k_default_prec
             )
-                : m_base(std::move(inNumer), std::move(inDenom), inPrec)
+                : m_base(
+                    std::move(inNumer),
+                    std::move(inDenom),
+                    inPrec
+                )
             {}
             
-            Fract(const Impl_Fract_& inFrac)
+            explicit Fract(const Impl_Fract_& inFrac)
                 : m_base(inFrac)
             {}
             
-            Fract(Impl_Fract_&& inFrac)
+            explicit Fract(Impl_Fract_&& inFrac)
                 : m_base(std::move(inFrac))
             {}
 
@@ -189,6 +216,9 @@ namespace Precision{
         
     inline Fract operator%(Fract lhs, const Fract& rhs)
         {return lhs %= rhs;}
+
+    inline Fract operator^(Fract lhs, const Fract::Integer& rhs)
+        {return lhs ^= rhs;}
 
     inline Fract operator^(Fract lhs, const Fract& rhs)
         {return lhs ^= rhs;}

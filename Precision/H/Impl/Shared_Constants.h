@@ -5,8 +5,5 @@ constexpr size_t
     k_default_prec = 100,
     k_display_prec = 5
 ;
-constexpr short
-    k_limit = 10
-;
 
 #endif

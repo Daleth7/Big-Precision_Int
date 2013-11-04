@@ -90,6 +90,7 @@ int main()
                 << (subject1 * subject0).str() << " : "
                 << pass((subject1 * subject0) == Int("-3606149702256469505198912320470"))
             << '\n';
+
             cout << t+t << "Int::operator/=(const Int&): "
                 << (subject0 / subject1).str() << " : "
                 << pass((subject0 / subject1) == Int("-172827"))
@@ -392,12 +393,12 @@ int main()
                 << (subject4 ^ Int(7)).str() << " : "
                 << pass(Float(subject4 ^ Int(7)).str() == "+610.3515625")
             << '\n';
-/*
+
             cout << t+t << "Float::operator^=(const Float&): "
-                << (subject4 ^ subject5).str() << " : "
-       //         << pass(Float(subject4 ^ subject5).str(8) == "+1057.65509515")
+                << (subject4 ^ subject5).str(10) << " : "
+                << pass(Float(subject4 ^ subject5).str(10) == "+1057.6550951464")
             << '\n';
-*/
+
     subject4 = "56034.7890"_Precision_Float;
             cout << t+t << "operator\"\" _Precision_Float(char const *const,size_t): "
                 << subject4.str() << " : "
@@ -509,7 +510,7 @@ int main()
         cout << t << "Arithmetic operators:\n";
             cout << t+t << "UFloat::operator+=(const UFloat&): "
                 << (subject7 + subject6).str() << " : "
-                << pass((subject7 + subject6) == UFloat("+788999334.000333789"))
+                << pass((subject7 + subject6) == UFloat("+789912912.246579789"))
             << '\n';
             cout << t+t << "UFloat::operator-=(const UFloat&): "
                 << (subject7 - subject6).str() << " : "
@@ -575,11 +576,141 @@ int main()
                 << subject6.str() << " : "
                 << pass(subject6.str() == "+128374.0")
             << '\n';
+    cout << "Precision::Fract:\n";
+        cout << t << "Constructors:\n";
+    Fract subject8;
+            cout << t+t << "Fract::Fract(): "
+                << subject8.str() << " : "
+                << pass(subject8.str() == "+0/1")
+            << '\n';
+    subject8 = Fract(18237.293845);
+            cout << t+t << "Fract::Fract(long double): "
+                << subject8.str() << " : "
+                << pass(subject8.str() == "+3647458769/200000")
+            << '\n';
+    subject8 = Fract(Float("3.285714285714285714", 18));
+            cout << t+t << "Fract::Check_Pattern(Str, Float): "
+                << subject8.str() << " : "
+                << pass(subject8.str() == "+23/7")
+            << '\n';
+    subject8 = Fract("-1928379182471235.2837098749648");
+            cout << t+t << "Fract::Fract(Str): "
+                << subject8.str() << " : "
+                << pass(subject8.str() == "-1205236989044522052318671853/625000000000")
+            << '\n';
+    subject8 = Fract("237468237623432"_Precision_Int);
+            cout << t+t << "Fract::Fract(Integer): "
+                << subject8.str() << " : "
+                << pass(subject8.str() == "+237468237623432/1")
+            << '\n';
+    subject8 = Fract("-127461249.023940298"_Precision_Float);
+            cout << t+t << "Fract::Fract(Float): "
+                << subject8.str() << " : "
+                << pass(subject8.str() == "-63730624511970149/500000000")
+            << '\n';
+    subject8 = Fract("-183744729784326996655298477496546"_Precision_Int, "5052980069068992408020708131155015"_Precision_Int);
+            cout << t+t << "Fract::Fract(Integer, Integer): "
+                << subject8.str() << " : "
+                << pass(subject8.str() == "-2/55")
+            << '\n';
+        cout << t << "Read-only functions:\n";
+            cout << t+t << "Fract::sign(): "
+                << subject8.sign() << " : "
+                << pass(subject8.sign() == -1)
+            << '\n';
+            cout << t+t << "Fract::numerator(): "
+                << subject8.numerator().str() << " : "
+                << pass(subject8.numerator() == -2_Precision_Int)
+            << '\n';
+            cout << t+t << "Fract::denominator(): "
+                << subject8.denominator().str() << " : "
+                << pass(subject8.denominator() == 55_Precision_Int)
+            << '\n';
+    subject8 = Fract(Int(-1244), Int(56));
+            cout << t+t << "Fract::mixed(): "
+                << subject8.mixed() << " : "
+                << pass(subject8.mixed() == "-22 3/14")
+            << '\n';
+            cout << t+t << "Fract::magnitude(): "
+                << subject8.magnitude().str() << " : "
+                << pass(subject8.magnitude().str() == "+311/14")
+            << '\n';
+            cout << t+t << "Fract::precision(): "
+                << subject8.precision() << " : "
+                << pass(subject8.precision() == 100)
+            << '\n';
+            cout << t+t << "Fract::whole(): "
+                << subject8.whole().str() << " : "
+                << pass(subject8.whole().str() == "-22")
+            << '\n';
+            cout << t+t << "Fract::decimal(): "
+                << subject8.decimal().str(5) << " : "
+                << pass(subject8.decimal().str(5) == "-22.21428")
+            << '\n';
+    Fract subject9(Int(6576321), Int(449519));
+            cout << t+t << "Fract::gcd(Fract): "
+                << subject8.gcd(subject9).str() << " : "
+                << pass(subject8.gcd(subject9).str() == "+7")
+            << '\n';
+            cout << t+t << "Fract::remainder(Fract): "
+                << subject8.remainder(subject9).str() << " : "
+                << pass(subject8.remainder(subject9).str() == "-6818845/13152642")
+            << '\n';
+        cout << t << "Arithmetic Operators:\n";
+            cout << t+t << "Fract::operator+=(Fract): "
+                << (subject8 + subject9).str() << " : "
+                << pass((subject8 + subject9).str() == "-6818845/899038")
+            << '\n';
+            cout << t+t << "Fract::operator-=(Fract): "
+                << (subject8 - subject9).str() << " : "
+                << pass((subject8 - subject9).str() == "-33124129/899038")
+            << '\n';
+            cout << t+t << "Fract::operator*=(Fract): "
+                << (subject8 * subject9).str() << " : "
+                << pass((subject8 * subject9).str() == "-2045235831/6293266")
+            << '\n';
+            cout << t+t << "Fract::operator/=(Fract): "
+                << (subject8 / subject9).str() << " : "
+                << pass((subject8 / subject9).str() == "-19971487/13152642")
+            << '\n';
+            cout << t+t << "Fract::operator-(): "
+                << (-subject8).str() << " : "
+                << pass((-subject8).str() == "+311/14")
+            << '\n';
+            cout << t+t << "Fract::operator~(): "
+                << (~subject8).str() << " : "
+                << pass((~subject8).str() == "-14/311")
+            << '\n';
+    subject0 = 80;
+            cout << t+t << "Fract::operator^=(Int): "
+                << (subject8 ^ subject0).str() << " : "
+                << pass((subject8 ^ subject0).str()
+                    == "+263530643282403693186533245135848"
+                    "9727201635742670117039853698383417424"
+                    "6787709309998651364251605086213452032"
+                    "4039347027852710239986242482116202132"
+                    "0092286412309674160891192907918036418"
+                    "5975891637205660801/49005277664853092"
+                    "6503925164706454801750793782124721438"
+                    "88975139770441605011777683293445554176"
+                )
+            << '\n';
 
 
 
 /********************Precision Math********************************/
     cout << "\nPrecision Math:\n";
+    subject0 = Sqrt(Int(50625));
+            cout << t+t << "Sqrt(Int): "
+                << subject0.str() << " : "
+                << pass(subject0.str() == Int::Str("+225"))
+            << '\n';
+    subject4 = Float("872364872.2348172");
+    subject4 = Sqrt(subject4, subject4.precision()/5);
+            cout << t+t << "Sqrt(Float): "
+                << subject4.str() << " : "
+                << pass(subject4.str(10) == Float::Str("+29535.8235408260"))
+            << '\n';
     subject0 = Pow(Int(123), Int(40));
             cout << t+t << "Pow(Int, Int): "
                 << subject0.str() << " : "
@@ -588,10 +719,15 @@ int main()
                     "52236061387660472578401")
                     )
             << '\n';
-    subject0 = Factorial(Int(400));
+    subject0 = Factorial(400);
             cout << t+t << "Factorial(Int): "
                 << subject0.sci_note(11) << " : "
                 << pass(subject0.sci_note(11) == ("+6.40345228466E868"))
+            << '\n';
+    subject0 = GCF(Int("1083901458"), string("7650399054"));
+            cout << t+t << "GCF(Int): "
+                << subject0.str() << " : "
+                << pass(subject0.str() == "+876234")
             << '\n';
             cout << t+t << "Num_to_Words(Int): "
                 << Num_to_Words("10283479821734098625872648767283737"_Precision_Int)
@@ -603,5 +739,8 @@ int main()
     for(size_t i(0); i < 100; ++i)
         seed = Rand(), cout << "\t#" << i+1 << ": " << Rand(seed).str() << '\n';
 */
+//cin.get();
+
     return 0;
+
 }

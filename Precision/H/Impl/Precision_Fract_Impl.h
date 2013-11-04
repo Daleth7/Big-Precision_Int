@@ -15,6 +15,7 @@ class Impl_Fract_{
         using ld        = Precision::Float::ld;
         using lli       = Precision::Int::lli;
         using ulli      = unsigned long long int;
+        using Size_Type = Precision::Int::Size_Type;
 //Arithmetic operators
         Impl_Fract_& operator+=(const Impl_Fract_&);
         Impl_Fract_& operator-=(const Impl_Fract_&);
@@ -36,13 +37,15 @@ class Impl_Fract_{
         Impl_Fract_ operator^=(const Impl_Fract_&);
 //Read-only functions
         Sign sign()const;
+        bool even()const;
+        bool odd()const;
         Integer numerator()const;
         Integer denominator()const;
         Str str()const;
         Str mixed()const;
     //Set the precision through parameter
         Impl_Fract_ magnitude()const;
-        size_t precision()const;
+        Size_Type precision()const;
         short compare(const Impl_Fract_&)const;
     //Following two pairs are merely different names for the same thing
         Integer whole()const;
@@ -50,22 +53,26 @@ class Impl_Fract_{
         Integer integer()const;
         Float floating_point()const;
         Integer gcd(const Impl_Fract_&)const;
+        Impl_Fract_ inverse()const;
 
         Impl_Fract_ remainder(const Impl_Fract_&)const;
 //Other modifiers
-        void precision(size_t);
+        void precision(Size_Type);
+        Impl_Fract_& invert();
+        void sign(Sign);
+        void negate();
 //Overload cast operators
         explicit operator Integer() const;
         explicit operator Float() const;
 //Constructors and destructor
-        Impl_Fract_(ld = 0.0, size_t = k_default_prec);
-        Impl_Fract_(Str, size_t = k_default_prec);
-        Impl_Fract_(const Integer&, size_t = k_default_prec);
+        Impl_Fract_(ld = 0.0, Size_Type = k_default_prec);
+        Impl_Fract_(Str, Size_Type = k_default_prec);
+        Impl_Fract_(const Integer&, Size_Type = k_default_prec);
         Impl_Fract_(const Float&);
-        Impl_Fract_(
+        explicit Impl_Fract_(
             const Integer&,
             const Integer&,
-            size_t = k_default_prec
+            Size_Type = k_default_prec
         );
 
         Impl_Fract_(const Impl_Fract_&)             =default;
@@ -76,13 +83,15 @@ class Impl_Fract_{
     public:
 //Helpers
         void Simplify();
+        void Check_Pattern(const Str&, const Float&);
+        Integer GCF_Helper(Integer, Integer)const;
     private:
         Integer
                 m_numer,
                 m_denom
         ;
-        size_t  m_precision;
-        static constexpr size_t k_default_prec = 100;
+        Size_Type  m_precision;
+        static constexpr Size_Type k_default_prec = 100;
 };
 
 Impl_Fract_ operator+(Impl_Fract_, const Impl_Fract_&);

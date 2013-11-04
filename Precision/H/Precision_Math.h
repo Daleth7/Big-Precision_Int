@@ -6,11 +6,12 @@
 
 namespace Precision{
 //Int
+    template <class _Precision_Type_>
+        _Precision_Type_ Sqrt(const _Precision_Type_&, size_t = 10);
     Int Pow(const Int&, Int);
     Int Factorial(const Int&);
     Int Log(const Int&, const Int&);
-        //Currently inefficient
-    Int GCF(const Int&, const Int&);
+    Int GCF(Int, Int);
     //Trigonomic functions -- default is radians
         //sin needs to make an internal copy anyway, so make non-const
     double Sin(Int);
@@ -34,6 +35,7 @@ namespace Precision{
 //Float
     Float fPow(const Float&, Float::Integer);
     Float fPow(const Float&, const Float&);
+    Float ln(const Float&, size_t = 0);
     Float Remainder(const Float&, const Float&);
 /* Support only after studying mathematical gamma function for factorials
     Float Factorial(const Float&);

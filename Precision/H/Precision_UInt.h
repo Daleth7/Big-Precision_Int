@@ -17,92 +17,99 @@ namespace Precision{
             using diglist   = Int::diglist;
             using digit     = Int::digit;
             using Sign      = Int::Sign;
+            using Size_Type = Int::Size_Type;
     //Arithmetic operators
-            inline UInt& operator+=(const UInt& rhs){
+            UInt& operator+=(const UInt& rhs){
                 m_base += rhs.m_base;
                 if(m_base.sign() < 0)
                     m_base = 0;
                 return *this;
             }
 
-            inline UInt& operator-=(const UInt& rhs){
+            UInt& operator-=(const UInt& rhs){
                 m_base -= rhs.m_base;
                 if(m_base.sign() < 0)
                     m_base = 0;
                 return *this;
             }
 
-            inline UInt& operator*=(const UInt& rhs)
+            UInt& operator*=(const UInt& rhs)
                 {return m_base *= rhs.m_base, *this;}
 
-            inline UInt& operator/=(const UInt& rhs)
+            UInt& operator/=(const UInt& rhs)
                 {return m_base /= rhs.m_base, *this;}
                 
-            inline UInt& operator%=(const UInt& rhs)
+            UInt& operator%=(const UInt& rhs)
                 {return m_base %= rhs.m_base, *this;}
                 
-            inline UInt& operator--()
+            UInt& operator--()
                 {return --m_base, *this;}
                 
-            inline UInt operator--(int)
+            UInt operator--(int)
                 {return m_base--;}
                 
-            inline UInt& operator++()
+            UInt& operator++()
                 {return ++m_base, *this;}
                 
-            inline UInt operator++(int)
+            UInt operator++(int)
                 {return m_base++;}
                 
     //Bitwise operators
-            inline UInt& operator&=(const UInt& rhs)
+            UInt& operator&=(const UInt& rhs)
                 {return m_base &= rhs.m_base, *this;}
                 
-            inline UInt& operator|=(const UInt& rhs)
+            UInt& operator|=(const UInt& rhs)
                 {return m_base |= rhs.m_base, *this;}
                 
-            inline UInt& operator^=(const UInt& rhs)
+            UInt& operator^=(const UInt& rhs)
                 {return m_base ^= rhs.m_base, *this;}
                 
-            inline UInt& operator<<=(const UInt& rhs)
+            UInt& operator<<=(const UInt& rhs)
                 {return m_base <<= rhs.m_base, *this;}
                 
-            inline UInt& operator>>=(const UInt& rhs)
+            UInt& operator>>=(const UInt& rhs)
                 {return m_base >>= rhs.m_base, *this;}
                 
     //Read-only functions
-            inline Str str()const
+            Str str()const
                 {return m_base.str();}
+
+            bool even()const
+                {return m_base.even();}
+
+            bool odd()const
+                {return m_base.odd();}
                 
         //Set the precision through parameter
-            inline Str sci_note(size_t inPrec = k_display_prec)const
+            Str sci_note(Size_Type inPrec = k_display_prec)const
                 {return m_base.sci_note(inPrec);}
                 
-            inline Str sci_note_w_spaces(size_t inPrec = k_display_prec)const
+            Str sci_note_w_spaces(Size_Type inPrec = k_display_prec)const
                 {return m_base.sci_note_w_spaces(inPrec);}
                 
-            inline size_t count_digits()const
+            Size_Type count_digits()const
                 {return m_base.count_digits();}
                 
-            inline short compare(const UInt& s)const
+            short compare(const UInt& s)const
                 {return m_base.compare(s.m_base);}
                 
-            inline Int base()const
+            Int base()const
                 {return m_base;}
                 
-            inline Int operator-()const
+            Int operator-()const
                 {return -m_base;}
                 
                 //Does not work for ~0
-            inline Int operator~()const
+            Int operator~()const
                 {return Int(~m_base);}
     
     //Other modifiers
                 //Multiplies integer by a power of ten
-            inline void shift(lli tens_exp)
+            void shift(lli tens_exp)
                 {m_base.shift(tens_exp);}
                 
     //Conversion operators
-            inline explicit operator Int()
+            explicit operator Int()
                 {return m_base;}
                 
     //Constructors and destructor

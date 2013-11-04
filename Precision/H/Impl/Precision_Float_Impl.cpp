@@ -57,7 +57,7 @@ Impl_Float_ Impl_Float_::operator++(int)
 
 Impl_Float_ Impl_Float_::operator-()const{
     Impl_Float_ toreturn(*this);
-    toreturn.m_whole *= -1;
+    toreturn.m_whole.negate();
     return toreturn;
 }
 
@@ -68,60 +68,8 @@ Impl_Float_ Impl_Float_::operator-()const{
 Impl_Float_ Impl_Float_::operator~()const
     {return (1 / *this);}
     //Raise to the power of
-Impl_Float_& Impl_Float_::operator^=(Integer counter){
-    if(counter == 0)        return *this = 1;
-    else if(counter == 1)   return *this;
-    else if(counter == -1)  return *this = 1 / *this;
-
-    bool neg(counter.sign() == -1);
-    counter = counter.magnitude();
-    Impl_Float_ operand(*this);
-        //Exponentiation by squaring
-    if(counter % 2 == 0)
-        *this = ( (operand * operand) ^ (counter/2) );
-    else
-        *this = operand * ( (operand * operand) ^ ((counter - 1)/2) );    
-
-    if(neg)
-        return *this = 1 / *this;
-    return *this = *this;
-}
-Impl_Float_& Impl_Float_::operator^=(const Impl_Float_& s){
-    if(s == 0)        return *this = 1;
-    else if(s == 1)   return *this;
-    else if(s == -1)  return *this = 1 / *this;
-
-    /*
-        a^b [not XOR]
-        = e^(ln(a^b))
-        = e^(b*ln(a))
-        
-        ln(a) = SUM[n:1->INFINITY](
-            ((-1^(n+1))
-            * (a-1)^n
-            * (a - int(a))^n
-            / n
-        )
-        e^C = SUM[i:1->INFINITY]( C^i/i! )
-    */
-    const Impl_Float_ exp(s.magnitude());
-    Impl_Float_ nlogged(0);
-    for(size_t i(1); i < m_precision; ++i){
-        nlogged
-            += (i % 2 == 1 ? 1 : -1)
-            * ( (*this - 1) ^ i )
-            / i
-        ;
-    }
-    nlogged *= exp;
-    *this = 0;
-    for(size_t i(0); i < m_precision; ++i)
-        *this += (nlogged ^ i) / Precision::Factorial(i);
-    if(s.sign() < 0)
-        *this = 1 / *this;
-    
-    return *this;
-}
+Impl_Float_& Impl_Float_::operator^=(const Impl_Float_& s)
+    {return this->exponentiate(s);}
 
 
 
@@ -129,10 +77,16 @@ Impl_Float_& Impl_Float_::operator^=(const Impl_Float_& s){
 Impl_Float_::Sign Impl_Float_::sign()const
     {return m_whole.sign();}
 
-const size_t minLen(4);
+bool Impl_Float_::even()const
+    {return m_whole.even();}
+
+bool Impl_Float_::odd()const
+    {return m_whole.odd();}
+
+const Impl_Float_::Size_Type minLen(4);
 
 Impl_Float_::Str Impl_Float_::str(
-    size_t inPrec,
+    Size_Type inPrec,
     bool inShowFull
 )const{
     if(inPrec > m_precision)
@@ -159,7 +113,7 @@ Impl_Float_::Str Impl_Float_::str(
         return toreturn;
     }
 
-    size_t min = m_precision - inPrec - 1;
+    Size_Type min = m_precision - inPrec - 1;
     while(min-- > 0) toreturn.pop_back();
     
     if(toreturn.back() == '.' && m_precision > 0)
@@ -171,7 +125,7 @@ Impl_Float_::Str Impl_Float_::str(
 
 //Set the precision through parameter
 Impl_Float_::Str Impl_Float_::sci_note(
-    size_t inPrec,
+    Size_Type inPrec,
     bool inShowFull
 )const{
         //First get full image
@@ -181,7 +135,7 @@ Impl_Float_::Str Impl_Float_::sci_note(
     toreturn.insert(2, 1, '.');
     if(toreturn.size() > minLen && !inShowFull)
         toreturn.erase(minLen - 1 + inPrec);
-    size_t exp(m_whole.count_digits() - m_precision - 1);
+    Size_Type exp(m_whole.count_digits() - m_precision - 1);
     std::stringstream ss;
         ss << exp;
     toreturn += "E" + ss.str();
@@ -189,7 +143,7 @@ Impl_Float_::Str Impl_Float_::sci_note(
     return toreturn;
 }
 Impl_Float_::Str Impl_Float_::sci_note_w_spaces(
-    size_t inPrec,
+    Size_Type inPrec,
     bool inShowFull
 )const{
     Str toreturn(this->sci_note(inPrec, inShowFull));
@@ -203,11 +157,11 @@ Impl_Float_ Impl_Float_::magnitude()const{
     toreturn.m_whole = toreturn.m_whole.magnitude();
     return toreturn;
 }
-size_t Impl_Float_::count_digits()const
+Impl_Float_::Size_Type Impl_Float_::count_digits()const
     {return this->count_left_digits() + this->count_right_digits();}
-size_t Impl_Float_::count_left_digits()const
+Impl_Float_::Size_Type Impl_Float_::count_left_digits()const
     {return m_whole.count_digits() - m_precision;}
-size_t Impl_Float_::count_right_digits()const{
+Impl_Float_::Size_Type Impl_Float_::count_right_digits()const{
     if(m_whole == 0) return 1;
     std::string image(m_whole.str().substr(
             //Add 1 to account for sign character
@@ -216,22 +170,25 @@ size_t Impl_Float_::count_right_digits()const{
     while(image.back() == '0') image.pop_back();
     return image.size();
 }
-size_t Impl_Float_::precision()const
+Impl_Float_::Size_Type Impl_Float_::precision()const
     {return m_precision;}
-
 short Impl_Float_::compare(const Impl_Float_& s)const{
     if(m_whole.sign() < s.m_whole.sign())       return -1;
     else if(m_whole.sign() > s.m_whole.sign())  return 1;
     Integer epsilon(1);
     epsilon.shift(
-        m_precision < s.m_precision
-        ? s.m_precision - m_precision
-        : m_precision - s.m_precision
+        (
+            m_precision > s.m_precision
+            ? s.m_precision - m_precision
+            : m_precision - s.m_precision
+        )
+        + 1
     );
     Integer
         testee1(Generate_Operand(s.m_precision)),
         testee2(s.Generate_Operand(this->m_precision))
     ;
+
     if(testee1 < testee2+epsilon && testee1 > testee2-epsilon)
                                                 return 0;
     else return testee1.compare(testee2);
@@ -256,13 +213,25 @@ bool Impl_Float_::show_full(bool inFlag){
     //Multiplies integer by a power of ten
 void Impl_Float_::shift(lli tens_exp)
     {m_whole.shift(tens_exp);}
+void Impl_Float_::sign(Sign newsign)
+    {m_whole.sign(newsign);}
+void Impl_Float_::negate()
+    {m_whole.negate();}
+
+Impl_Float_& Impl_Float_::exponentiate(const Impl_Float_& s, Size_Type prec){
+    return
+        s.count_right_digits()
+        ? this->Exponentiate_Hub(s, prec)
+        : this->Exponentiate_Hub(s.integer())
+    ;
+}
 
 //Overload cast operators
 Impl_Float_::operator Integer() const
     {return this->integer();}
 
 //Constructors and destructor
-Impl_Float_::Impl_Float_(ld inFP, size_t inPrec)
+Impl_Float_::Impl_Float_(ld inFP, Size_Type inPrec)
     : m_whole(1)
     , m_precision(inPrec ? inPrec : k_default_prec)
     , m_show_full(false)
@@ -283,7 +252,8 @@ Impl_Float_::Impl_Float_(ld inFP, size_t inPrec)
     stage2.insert(0, 1, newsign == -1 ? '-' : '+');
     m_whole *= Integer(stage2);
 }
-Impl_Float_::Impl_Float_(diglist inImage, size_t inPrec)
+
+Impl_Float_::Impl_Float_(diglist inImage, Size_Type inPrec)
     : m_whole(1)
     , m_precision(inPrec)
     , m_show_full(false)
@@ -293,9 +263,10 @@ Impl_Float_::Impl_Float_(diglist inImage, size_t inPrec)
     else{
         m_whole.shift(
             m_precision
-            - (inImage.size() - inImage.find('.') - 1)
+            - (inImage.size() - inImage.find('.'))
+            + 1
         );
-        while((inImage.size() - inImage.find('.')) > inPrec)
+        while((inImage.size() - inImage.find('.') - 1) > inPrec)
             inImage.pop_back();
 
         inImage.erase(inImage.find('.'), 1);
@@ -303,30 +274,95 @@ Impl_Float_::Impl_Float_(diglist inImage, size_t inPrec)
     }
 }
 
-Impl_Float_::Impl_Float_(const Integer& inInt, size_t inPrec)
+Impl_Float_::Impl_Float_(const Integer& inInt, Size_Type inPrec)
     : m_whole(inInt)
     , m_precision(inPrec)
     , m_show_full(false)
 {m_whole.shift(inPrec);}
-Impl_Float_::Impl_Float_(const UInteger& inInt, size_t inPrec)
+
+Impl_Float_::Impl_Float_(const UInteger& inInt, Size_Type inPrec)
     : m_whole(inInt.base())
     , m_precision(inPrec)
     , m_show_full(false)
 {m_whole.shift(inPrec);}
 
 //Helpers
-void Impl_Float_::Update_Precision(size_t newPrec){
+void Impl_Float_::Update_Precision(Size_Type newPrec){
     if(newPrec >= m_precision) return;
     m_whole.shift(-static_cast<lli>(m_precision - newPrec));
     m_precision = newPrec;
 }
-Impl_Float_::Integer Impl_Float_::Generate_Operand(size_t inPrec)const{
+Impl_Float_::Integer Impl_Float_::Generate_Operand(Size_Type inPrec)const{
     if(inPrec <= m_precision) return m_whole;
     Integer toreturn(m_whole);
     toreturn.shift(inPrec - m_precision);
     return toreturn;
 }
+Impl_Float_& Impl_Float_::Exponentiate_Hub(Integer counter){
+    if(counter == 0)        return *this = 1;
+    else if(counter == 1)   return *this;
+    else if(counter == -1)  return *this = 1 / *this;
 
+    bool neg(counter.sign() == -1);
+    counter = counter.magnitude();
+    Impl_Float_ operand(*this);
+        //Exponentiation by squaring
+    if(counter.even())
+        *this = ( (operand * operand) ^ (counter/2) );
+    else
+        *this = operand * ( operand ^ (counter - 1) );    
+
+    if(neg)
+        return *this = 1 / *this;
+    return *this;
+}
+Impl_Float_& Impl_Float_::Exponentiate_Hub(
+    const Impl_Float_& s,
+    Size_Type prec
+){
+    if(s == 0)        return *this = 1;
+    else if(s == 1)   return *this;
+    else if(s == -1)  return *this = 1 / *this;
+
+    /*
+        a^b [not XOR]
+        = e^(ln(a^b))
+        = e^(b*ln(a))
+        
+        ln(a) = SUM[n:1->INFINITY](
+            ((-1^(n+1))
+            * (a-1)^n
+            * (a - int(a))^n
+            / n
+        )
+        e^C = SUM[i:1->INFINITY]( C^i/i! )
+    */
+    
+    const Impl_Float_ exponent(s.magnitude());
+    const bool inverted(this->magnitude() > 1);
+    Impl_Float_
+        nlogged(0),
+        _x(inverted ? (1 / *this) : *this)
+    ;
+    for(Size_Type i(1); i < (prec ? prec : m_precision); ++i){
+        nlogged
+            += (i % 2 == 1 ? 1 : -1)
+            * ( (_x - 1) ^ i )
+            / i
+        ;
+    }
+
+    if(inverted)
+        nlogged.negate();
+    nlogged *= exponent;
+    *this = 0;
+    for(Size_Type i(0); i < (prec ? prec : (m_precision*2)/5); ++i)
+        *this += (nlogged ^ i) / Precision::Factorial(i);
+    if(s.sign() < 0)
+        *this = 1 / *this;
+
+    return *this;
+}
 
 
 Impl_Float_ operator+(Impl_Float_ lhs, const Impl_Float_& rhs)
