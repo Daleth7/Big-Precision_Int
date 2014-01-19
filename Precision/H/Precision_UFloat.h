@@ -11,134 +11,156 @@ namespace Precision{
     class UFloat{
         public:
     //Type aliases
-            using UInteger  = UInt;
-            using Integer   = Int;
-            using Str       = Float::Str;
-            using ld        = Float::ld;
-            using lli       = Float::lli;
-            using diglist   = Float::diglist;
-            using Size_Type = Float::Size_Type;
+            using UInteger      = UInt;
+            using Integer       = Int;
+            using str_type      = Float::str_type;
+            using ld            = Float::ld;
+            using lli           = Float::lli;
+            using diglist_type  = Float::diglist_type;
+            using size_type     = Float::size_type;
+            using sign_type     = Float::sign_type;
     //Arithmetic operators
             UFloat& operator+=(const UFloat& rhs){
-                m_fbase += rhs.m_fbase;
-                if(m_fbase.sign() < 0)
-                    m_fbase = 0;
+                m_base += rhs.m_base;
+                if(m_base.sign() < 0)
+                    m_base = 0;
                 return *this;
             }
 
             UFloat& operator-=(const UFloat& rhs){
-                m_fbase -= rhs.m_fbase;
-                if(m_fbase.sign() < 0)
-                    m_fbase = 0;
+                m_base -= rhs.m_base;
+                if(m_base.sign() < 0)
+                    m_base = 0;
                 return *this;
             }
 
             UFloat& operator*=(const UFloat& rhs)
-                {return m_fbase *= rhs.m_fbase, *this;}
+                {return m_base *= rhs.m_base, *this;}
 
             UFloat& operator/=(const UFloat& rhs)
-                {return m_fbase /= rhs.m_fbase, *this;}
+                {return m_base /= rhs.m_base, *this;}
 
             UFloat& operator%=(const UFloat& rhs)
-                {return m_fbase %= rhs.m_fbase, *this;}
+                {return m_base %= rhs.m_base, *this;}
 
             UFloat& operator--()
-                {return --m_fbase, *this;}
+                {return --m_base, *this;}
 
             UFloat operator--(int)
-                {return UFloat(m_fbase--);}
+                {return UFloat(m_base--);}
 
             UFloat& operator++()
-                {return ++m_fbase, *this;}
+                {return ++m_base, *this;}
 
             UFloat operator++(int)
-                {return UFloat(m_fbase++);}
+                {return UFloat(m_base++);}
 
                 //Returns the power of, not XOR
             UFloat& operator^=(const Integer& rhs)
-                {return m_fbase ^= rhs, *this;}
+                {return m_base ^= rhs, *this;}
 
             UFloat& operator^=(const UFloat& rhs)
-                {return m_fbase ^= rhs.m_fbase, *this;}
+                {return m_base ^= rhs.m_base, *this;}
 
     //Read-only functions
-            Str str(
-                Size_Type inPrec = 0,
-                bool inShowFull = false
-            )const{return m_fbase.str(inPrec, inShowFull);}
+            sign_type sign()const
+                {return 1;}
+
+            str_type str(size_type inPrec = 0, bool inShowFull = false)const
+                {return m_base.str(inPrec, inShowFull);}
 
             bool even()const
-                {return m_fbase.even();}
+                {return m_base.even();}
 
             bool odd()const
-                {return m_fbase.odd();}
+                {return m_base.odd();}
 
         //Set the precision through parameter
-            Str sci_note(
-                Size_Type inPrec = 0,
+            str_type sci_note(
+                size_type inPrec = k_display_prec,
                 bool inShowFull = false
-            )const{return m_fbase.sci_note(inPrec, inShowFull);}
+            )const{return m_base.sci_note(inPrec, inShowFull);}
 
-            Str sci_note_w_spaces(
-                Size_Type inPrec = 0,
+            str_type sci_note_w_spaces(
+                size_type inPrec = k_display_prec,
                 bool inShowFull = false
-            )const{return m_fbase.sci_note_w_spaces(inPrec, inShowFull);}
+            )const{return m_base.sci_note_w_spaces(inPrec, inShowFull);}
 
-            Size_Type count_digits()const
-                {return m_fbase.count_digits();}
+            size_type count_digits()const
+                {return m_base.count_digits();}
 
-            Size_Type count_left_digits()const
-                {return m_fbase.count_left_digits();}
+            size_type count_left_digits()const
+                {return m_base.count_left_digits();}
 
-            Size_Type count_right_digits()const
-                {return m_fbase.count_right_digits();}
+            size_type count_right_digits()const
+                {return m_base.count_right_digits();}
 
-            Size_Type precision()const
-                {return m_fbase.precision();}
+            size_type precision()const
+                {return m_base.precision();}
 
             short compare(const UFloat& s)const
-                {return m_fbase.compare(s.m_fbase);}
+                {return m_base.compare(s.m_base);}
 
             Integer integer()const
-                {return m_fbase.integer();}
+                {return m_base.integer();}
 
             bool show_full()const
-                {return m_fbase.show_full();}
+                {return m_base.show_full();}
 
             UFloat remainder(const UFloat& s)const
-                {return UFloat(m_fbase.remainder(s.m_fbase));}
+                {return UFloat(m_base.remainder(s.m_base));}
 
             Float base()const
-                {return m_fbase;}
+                {return m_base;}
             
             Float operator-()const
-                {return -m_fbase;}
+                {return -m_base;}
+
+            bool is_integer()const
+                {return m_base.is_integer();}
+
+            UFloat inverse()const
+                {return UFloat(m_base.inverse());}
 
     //Other modifers
+            void sign(sign_type){}
+
             bool show_full(bool inFlag)
-                {return m_fbase.show_full(inFlag);}
+                {return m_base.show_full(inFlag);}
 
                 //Multiplies integer by a power of ten
             void shift(lli tens_exp)
-                {m_fbase.shift(tens_exp);}
+                {m_base.shift(tens_exp);}
+
+            void shift_left(size_type e)
+                {m_base.shift_left(e);}
+
+            void shift_right(size_type e)
+                {m_base.shift_right(e);}
+
+            UFloat& invert()
+                {return m_base.invert(), *this;}
+
+            void swap(UFloat& s)
+                {m_base.swap(s.m_base);}
 
     //Overload cast operators
             explicit operator Integer() const
-                {return static_cast<Integer>(m_fbase);}
+                {return static_cast<Integer>(m_base);}
 
             explicit operator UInteger() const
-                {return static_cast<Integer>(m_fbase);}
+                {return static_cast<Integer>(m_base);}
 
     //Constructors and destructor
-            UFloat(ld inFP = 0.0, Size_Type inPrec = k_default_prec)
-                : m_fbase(inFP, inPrec)
+            UFloat(ld inFP = 0.0, size_type inPrec = k_default_prec)
+                : m_base(inFP*(inFP>0?1:-1), inPrec)
             {}
 
             UFloat(
-                const diglist& inImage,
-                Size_Type inPrec = k_default_prec
+                const str_type& inImage,
+                size_type inPrec = k_default_prec
             )
-                : m_fbase(
+                : m_base(
                     inImage[0] == '-' || inImage[0] == '+'
                         ? inImage.substr(1) : inImage,
                     inPrec
@@ -147,57 +169,39 @@ namespace Precision{
 
             explicit UFloat(
                 const Integer& inInt,
-                Size_Type inPrec = k_default_prec
+                size_type inPrec = k_default_prec
             )
-                : m_fbase(inInt, inPrec)
-            {
-                if(m_fbase.sign() < 0)
-                    m_fbase = 0;
-            }
+                : m_base(inInt, inPrec)
+            {m_base.sign(1);}
 
             explicit UFloat(
                 Integer&& inInt,
-                Size_Type inPrec = k_default_prec
+                size_type inPrec = k_default_prec
             )
-                : m_fbase(std::move(inInt), inPrec)
-            {
-                if(m_fbase.sign() < 0)
-                    m_fbase = 0;
-            }
+                : m_base(std::move(inInt), inPrec)
+            {m_base.sign(1);}
 
             explicit UFloat(
                 const UInteger& inInt,
-                Size_Type inPrec = k_default_prec
+                size_type inPrec = k_default_prec
             )
-                : m_fbase(inInt, inPrec)
-            {
-                if(m_fbase.sign() < 0)
-                    m_fbase = 0;
-            }
+                : m_base(inInt, inPrec)
+            {m_base.sign(1);}
 
             explicit UFloat(
                 UInteger&& inInt,
-                Size_Type inPrec = k_default_prec
+                size_type inPrec = k_default_prec
             )
-                : m_fbase(std::move(inInt), inPrec)
-            {
-                if(m_fbase.sign() < 0)
-                    m_fbase = 0;
-            }
+                : m_base(std::move(inInt), inPrec)
+            {m_base.sign(1);}
 
             explicit UFloat(const Float& inFP)
-                : m_fbase(inFP)
-            {
-                if(m_fbase.sign() < 0)
-                    m_fbase = 0;
-            }
+                : m_base(inFP)
+            {m_base.sign(1);}
 
             explicit UFloat(Float&& inFP)
-                : m_fbase(std::move(inFP))
-            {
-                if(m_fbase.sign() < 0)
-                    m_fbase = 0;
-            }
+                : m_base(std::move(inFP))
+            {m_base.sign(1);}
 
             UFloat(const UFloat&)               =default;
             UFloat(UFloat&&)                    =default;
@@ -205,7 +209,7 @@ namespace Precision{
             UFloat& operator=(UFloat&&)         =default;
             ~UFloat()                           =default;
         private:
-            Float   m_fbase;
+            Float   m_base;
     };
 
     inline UFloat operator+(UFloat lhs, const UFloat& rhs)
@@ -251,10 +255,13 @@ namespace Precision{
         {return testee == 0;}
 }
 
+inline void swap(Precision::UFloat& a, Precision::UFloat& b)
+    {a.swap(b);}
+
 inline Precision::UFloat operator"" _Precision_UFloat(
     char const *const raw,
     size_t
-){return Precision::UFloat::Str(raw);}
+){return Precision::UFloat::str_type(raw);}
 
 inline Precision::UFloat operator"" _Precision_UFloat_E(
     char const *const raw,

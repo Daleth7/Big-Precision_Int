@@ -1,9 +1,6 @@
 #include "Precision_Fract_Impl.h"
 
-#include "Precision_Int.h"
-#include "Precision_Float.h"
-
-#include "Precision_Math.h"
+#include "Precision_Math_Shared_Functions.h"
 
 #include <sstream>
 
@@ -51,8 +48,7 @@ Impl_Fract_& Impl_Fract_::operator*=(const Impl_Fract_& rhs){
 }
 Impl_Fract_& Impl_Fract_::operator/=(const Impl_Fract_& rhs){
     if(*this == 0 || rhs == 1 || rhs == 0)  return *this;
-    else if(*this == 1)                     return *this = rhs;
-
+    else if(*this == 1)                     return *this = ~rhs;
     return *this *= ~rhs;
 }
 Impl_Fract_& Impl_Fract_::operator%=(const Impl_Fract_& rhs){
@@ -78,19 +74,19 @@ Impl_Fract_ Impl_Fract_::operator-()const{
     //Invert the fraction
 Impl_Fract_ Impl_Fract_::operator~()const
     {return Impl_Fract_(m_denom, m_numer, m_precision);}
-    //Raise the fraction to the power of
-Impl_Fract_ Impl_Fract_::operator^=(const Integer& rhs){
-    m_numer = Precision::Pow(m_numer, rhs);
-    m_denom = Precision::Pow(m_denom, rhs);
-    return *this;
+
+Impl_Fract_ Impl_Fract_::operator^=(const Impl_Fract_& rhs){
+    return
+        (rhs.m_denom == 1)
+        ? this->exponentiate(rhs.m_numer)
+        : this->exponentiate(rhs, m_precision)
+    ;
 }
-Impl_Fract_ Impl_Fract_::operator^=(const Impl_Fract_& rhs)
-    {return *this = (Float(m_numer)/m_denom) ^ Float(rhs);}
 
 
 
 //Read-only functions
-Impl_Fract_::Sign Impl_Fract_::sign()const
+Impl_Fract_::sign_type Impl_Fract_::sign()const
     {return m_numer.sign();}
 bool Impl_Fract_::even()const
     {return m_numer.even();}
@@ -100,38 +96,44 @@ Impl_Fract_::Integer Impl_Fract_::numerator()const
     {return m_numer;}
 Impl_Fract_::Integer Impl_Fract_::denominator()const
     {return m_denom;}
-Impl_Fract_::Str Impl_Fract_::str()const{
-    Str temp(m_denom.str());
-    temp.erase(0, 1); //Get rid of sign
+Impl_Fract_::str_type Impl_Fract_::str()const{
+    str_type temp(m_denom.str().substr(1));
     return m_numer.str() + "/" + temp;
 }
-Impl_Fract_::Str Impl_Fract_::mixed()const{
+Impl_Fract_::str_type Impl_Fract_::mixed()const{
     if(this->whole() == 0) return this->str();
     return
         this
         -> whole()
         . str()
         + " "
-        + (Impl_Fract_(m_numer)%Impl_Fract_(m_denom))
+        + (m_numer%m_denom)
+        . str()
+        . substr(1)
+        + "/"
+        + m_denom
         . str()
         . substr(1)
     ;
 }
     //Set the precision through parameter
-Impl_Fract_ Impl_Fract_::magnitude()const
-    {return Impl_Fract_(m_numer.magnitude(), m_denom, m_precision);}
-Impl_Fract_::Size_Type Impl_Fract_::precision()const
+Impl_Fract_ Impl_Fract_::magnitude()const{
+    Impl_Fract_ toreturn(*this);
+    toreturn.sign(1);
+    return toreturn;
+}
+Impl_Fract_::size_type Impl_Fract_::precision()const
     {return m_precision;}
 short Impl_Fract_::compare(const Impl_Fract_& s)const{
     if(this == &s)                              return 0;
-    if(m_numer.sign() < s.m_numer.sign())       return -1;
+    else if(m_numer.sign() < s.m_numer.sign())  return -1;
     else if(m_numer.sign() > s.m_numer.sign())  return 1;
-
-    return (Float(m_numer)/m_denom).compare(Float(s.m_numer)/s.m_denom);
+    Integer gcfactor = Precision::gcf(m_denom, s.m_denom);
+    return (m_numer*gcfactor).compare(s.m_numer*gcfactor);
 }
     //Following two pairs are merely different names for the same thing
 Impl_Fract_::Integer Impl_Fract_::whole()const
-    {return (Float(m_numer)/m_denom).integer();}
+    {return m_numer/m_denom;}
 Impl_Fract_::Float Impl_Fract_::decimal()const
     {return Float(m_numer)/m_denom;}
 Impl_Fract_::Integer Impl_Fract_::integer()const
@@ -139,29 +141,67 @@ Impl_Fract_::Integer Impl_Fract_::integer()const
 Impl_Fract_::Float Impl_Fract_::floating_point()const
     {return this->decimal();}
 Impl_Fract_::Integer Impl_Fract_::gcd(const Impl_Fract_& s)const
-    {return this->GCF_Helper(m_denom, s.m_denom);}
+    {return this->GCD_Helper(m_denom, s.m_denom);}
 
 Impl_Fract_ Impl_Fract_::remainder(const Impl_Fract_& rhs)const
     {return Impl_Fract_(*this) %= rhs;}
 Impl_Fract_ Impl_Fract_::inverse()const
     {return ~(*this);}
+bool Impl_Fract_::is_integer()const
+    {return m_denom == 1;}
 
 
 
 //Other modifiers
-void Impl_Fract_::precision(Size_Type inPrec)
+void Impl_Fract_::precision(size_type inPrec)
     {m_precision = (inPrec ? inPrec : 1);}
+
 Impl_Fract_& Impl_Fract_::invert(){
     std::swap(m_numer, m_denom);
     if(m_denom.sign() < 0)
         m_numer.negate(), m_denom.sign(1);
     return *this;
 }
-void Impl_Fract_::sign(Sign newsign)
+
+void Impl_Fract_::sign(sign_type newsign)
     {m_numer.sign(newsign);}
+
 void Impl_Fract_::negate()
     {m_numer.negate();}
 
+void Impl_Fract_::swap(Impl_Fract_& s){
+    std::swap(m_numer, s.m_numer);
+    std::swap(m_denom, s.m_denom);
+    std::swap(m_precision, s.m_precision);
+}
+
+void Impl_Fract_::shift(lli z){
+    if(z < 0)
+        this->shift_right(-z);
+    else
+        this->shift_left(z);
+}
+
+void Impl_Fract_::shift_left(size_type e){
+    m_numer.shift_left(e);
+    this->Simplify();
+}
+
+void Impl_Fract_::shift_right(size_type e){
+    m_denom.shift_left(e);
+    this->Simplify();
+}
+
+Impl_Fract_& Impl_Fract_::exponentiate(const Integer& exp){
+    m_numer = Precision::exponentiate(m_numer, exp);
+    m_denom = Precision::exponentiate(m_denom, exp);
+    return *this;
+}
+
+Impl_Fract_& Impl_Fract_::exponentiate(const Impl_Fract_& exp, size_type prec){
+    if(m_numer.negative() && exp.m_denom.even())   return *this = 0;
+    return *this = Precision::exponentiate(*this, exp, prec ? prec : m_precision);
+}
 
 //Overload cast operators
 Impl_Fract_::operator Integer() const
@@ -170,31 +210,30 @@ Impl_Fract_::operator Float() const
     {return Float(m_numer) / m_denom;}
 
 //Constructors and destructor
-Impl_Fract_::Impl_Fract_(ld inFP, Size_Type inPrec)
+Impl_Fract_::Impl_Fract_(ld inFP, size_type inPrec)
     : m_numer(0)
     , m_denom(1)
     , m_precision(inPrec)
 {
-    Precision::Float catalyst(inFP);
-    this->Check_Pattern(
-        catalyst
-        . str()
-        . substr(catalyst.str().find('.') + 1)
-        , catalyst
-    );
+    if(inFP > 1e-15 || inFP < -1e-15){
+        Precision::Float catalyst(inFP);
+        this->Check_Pattern(
+            catalyst
+            . str()
+            . substr(catalyst.str().find('.') + 1)
+            , catalyst
+        );
 
-    if(m_denom == 1){
-        m_denom.shift(catalyst.count_right_digits());
-        catalyst.shift(catalyst.count_right_digits());
-        m_numer = catalyst.integer();
+        if(m_denom == 1){
+            m_denom.shift_left(catalyst.count_right_digits());
+            catalyst.shift_left(catalyst.count_right_digits());
+            m_numer = catalyst.integer();
+        }
+
+        this->Simplify();
     }
-
-    this->Simplify();
 }
-Impl_Fract_::Impl_Fract_(
-    Str inImage,
-    Size_Type inPrec
-)
+Impl_Fract_::Impl_Fract_(str_type inImage, size_type inPrec)
     : m_numer(0)
     , m_denom(1)
     , m_precision(inPrec)
@@ -204,18 +243,18 @@ Impl_Fract_::Impl_Fract_(
         , Float(inImage)
     );
     if(m_denom == 1){
-        Size_Type tens_exp(
-            inImage.find('.') == Str::npos
+        size_type tens_exp(
+            inImage.find('.') == str_type::npos
             ? 0
             : inImage.substr(inImage.find('.')+1).size()
         );
         inImage.erase(inImage.find('.'), 1);
         m_numer = Integer(inImage);
-        m_denom.shift(tens_exp);
+        m_denom.shift_left(tens_exp);
     }
     this->Simplify();
 }
-Impl_Fract_::Impl_Fract_(const Integer& inWhole, Size_Type inPrec)
+Impl_Fract_::Impl_Fract_(const Integer& inWhole, size_type inPrec)
     : m_numer(inWhole)
     , m_denom(1)
     , m_precision(inPrec)
@@ -225,13 +264,13 @@ Impl_Fract_::Impl_Fract_(const Float& inFP)
     , m_denom(1)
     , m_precision(inFP.precision())
 {
-    const Str topass(inFP.str(0, true));
+    const str_type topass(inFP.str(0, true));
     this->Check_Pattern(topass.substr(topass.find('.')+1), inFP);
 
     if(m_denom == 1){
-        m_denom.shift(inFP.count_right_digits());
+        m_denom.shift_left(inFP.count_right_digits());
         Float catalyst(inFP);
-        catalyst.shift(catalyst.count_right_digits());
+        catalyst.shift_left(catalyst.count_right_digits());
         m_numer = catalyst.integer();
     }
 
@@ -240,7 +279,7 @@ Impl_Fract_::Impl_Fract_(const Float& inFP)
 Impl_Fract_::Impl_Fract_(
     const Integer& inNumerator,
     const Integer& inDenominator,
-    Size_Type inPrecision
+    size_type inPrecision
 )
     : m_numer(inNumerator)
     , m_denom(inDenominator)
@@ -259,19 +298,15 @@ void Impl_Fract_::Simplify(){
     }else if(m_denom.sign() < 0){
         m_numer.negate();
         m_denom.sign(1);
-        return;
     }
 
-    const Integer GCF(this->GCF_Helper(m_denom, m_numer.magnitude()));
+    const Integer GCD(this->GCD_Helper(m_denom, m_numer.magnitude()));
 
-    m_numer /= GCF;
-    m_denom /= GCF;
+    m_numer /= GCD;
+    m_denom /= GCD;
 }
 
-void Impl_Fract_::Check_Pattern(
-    const Str& image,
-    const Float& catalyst
-){
+void Impl_Fract_::Check_Pattern(const str_type& image, const Float& catalyst){
 /*
         Derivation of Brent's derivation of
     the tortoise and hare algorithm
@@ -307,73 +342,42 @@ void Impl_Fract_::Check_Pattern(
         ++mu;
     }
 
-    if(mu > 1 && image.substr(0, mu+1).find_last_of('0') > 0)
+    if(
+        (mu > 1 && image.substr(0, mu+1).find_last_of('0') > 0) ||
+        lambda == image.size()
+    )   return;
+    const str_type pattern(image.substr(0, mu+lambda));
+    if(pattern.find(image.substr(image.size()-lambda)) == str_type::npos)
         return;
-//Now use mu and lambda to compare against known patterns
-    const Str pattern(image.substr(0, mu+lambda+2));
-    auto match_against = [&](
-        Str&& tomatch, 
-        unsigned D,
-        unsigned N,
-        bool special = false
-    ){
-        if(mu > 0 && image[image.rfind('0')+1] != tomatch[0])
-            return;
-        else if(pattern == tomatch){
-            Integer offset(1);
-            offset.shift(special ? mu-1 : mu);
-            m_denom = D * offset;
-            m_numer = catalyst.integer()*D + N;
-        }
-    };
-
-    match_against("333", 3, 1);
-    match_against("666", 3, 2);
-    match_against("1666", 6, 1, true);
-    match_against("8333", 6, 5, true);
-    match_against("14285714", 7, 1);
-    match_against("28571428", 7, 2);
-    match_against("42857142", 7, 3);
-    match_against("57142857", 7, 4);
-    match_against("71428571", 7, 5);
-    match_against("85714285", 7, 6);
-    match_against("111", 9, 1);
-    match_against("222", 9, 2);
-    match_against("444", 9, 4);
-    match_against("555", 9, 5);
-    match_against("777", 9, 7);
-    match_against("888", 9, 8);
-    match_against("999", 9, 9);
-    match_against("0909", 11, 1);
-    match_against("1818", 11, 2);
-    match_against("2727", 11, 3);
-    match_against("3636", 11, 4);
-    match_against("4545", 11, 5);
-    match_against("5454", 11, 6);
-    match_against("6363", 11, 7);
-    match_against("7272", 11, 8);
-    match_against("8181", 11, 9);
-    match_against("9090", 11, 10);
-    match_against("08333", 12, 1, true);
+    Integer nonpat(pattern.substr(0, mu));
+        nonpat.sign(catalyst.sign());
+    m_numer = pattern.substr(mu);
+        m_numer.sign(catalyst.sign());
+    m_denom = str_type(lambda, '9');
+    m_numer += m_denom*nonpat;
+        m_denom.shift_left(mu);
+    m_numer += m_denom*catalyst.integer();
 }
 
-Impl_Fract_::Integer Impl_Fract_::GCF_Helper(
-    Integer toreturn,
-    Integer quotient
+Impl_Fract_::Integer Impl_Fract_::GCD_Helper(
+    const Integer& a,
+    const Integer& b
 )const{
 //Euclid's Algorithm:
-//  http://en.wikipedia.org/wiki/
-//  Greatest_common_divisor
-//  #Using_Euclid.27s_algorithm
-    while(true){
-        if(quotient % toreturn == 0) break;
-        Integer hold(toreturn);
-        toreturn = quotient % toreturn;
-        quotient = hold;
+//http://en.wikipedia.org/wiki/Greatest_common_divisor#Using_Euclid.27s_algorithm
+
+    Integer toreturn(a), prev(b);
+    while(prev != 0){
+        toreturn %= prev;
+        std::swap(toreturn, prev);
     }
     return toreturn;
 }
 
+Impl_Fract_::Integer Impl_Fract_::GCF_Helper(
+    const Integer& a,
+    const Integer& b
+)const{return (a*b)/GCD_Helper(a, b);}
 
 Impl_Fract_ operator+(Impl_Fract_ lhs, const Impl_Fract_& rhs)
     {return Impl_Fract_(lhs) += rhs;}
@@ -403,3 +407,6 @@ bool operator<(const Impl_Fract_& lhs, const Impl_Fract_& rhs)
     {return lhs.compare(rhs) < 0;}
 bool operator!(const Impl_Fract_& lhs)
     {return lhs == 0;}
+
+void swap(Impl_Fract_& a, Impl_Fract_& b)
+    {a.swap(b);}

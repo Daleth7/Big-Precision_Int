@@ -6,5 +6,6 @@
 #include "H/Precision_Float.h"
 #include "H/Precision_UFloat.h"
 #include "H/Precision_Fract.h"
+#include "H/Precision_Math.h"
 
 #endif

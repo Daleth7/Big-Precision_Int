@@ -8,100 +8,19 @@
 #include <cmath>
 #include <list>
 #include <iterator>
+#include <utility>
+#include <algorithm>
 
 namespace Precision{
 //Int
-    Int Pow(const Int& b, Int exp){
-        if(exp == 1) return b;
-        else if(exp == 0) return 1;
-        else if(exp.sign() < 0) return 0;
-        
-        Int toreturn(b);
-        exp = exp.magnitude();
-        Int operand(b);
-            //Exponentiation by squaring
-        toreturn
-            = (exp % 2 == 0)
-            ? Pow( (operand * operand), (exp/2) )
-            : operand * Pow( (operand * operand), ((exp - 1)/2) )
-        ;
-        
-        return toreturn;
-    }
-
-    Int Factorial_Range(const Int& f, const Int& s){
-        if(s == f)
-            return s;
-        else if(s < f)
-            return 1;
-        else if(f+1 == s)
-            return f*s;
-        else
-            return
-                Factorial_Range(f, (f+s)/2)
-                * Factorial_Range((f+s)/2+1, s)
-            ;
-    }
-
-    Int Factorial(const Int& start){
-        return Factorial_Range(2, start);
-/*
-        Int toreturn(1), counter(start);
-        while(counter > 1)
-            toreturn *= counter--;
-        return toreturn;
-*/
-    }
-
-    Int Log(const Int& base, const Int& result){
-        if(base == result) return 1;
-        else if(base > result) return 0;
-        Int toreturn(1), testee(base);
-        while(testee < result)
-            ++toreturn, testee *= base;
-        return toreturn;
-    }
-    Int GCF(Int toreturn, Int quotient){
-    //Euclid's Algorithm:
-    //  http://en.wikipedia.org/wiki/
-    //  Greatest_common_divisor
-    //  #Using_Euclid.27s_algorithm
-        while(true){
-            if(quotient % toreturn == 0) break;
-            Int hold(toreturn);
-            toreturn = quotient % toreturn;
-            quotient = hold;
-        }
-        return toreturn;
-    }
-    //sin needs to make an internal copy anyway, so pass by value
-    double Sin(Int angle){
-        double buildup(0.0);
-        while(angle.magnitude() > 2*PI__){
-            angle -= 2*PI__*angle.sign();
-            buildup += 2*PI__ - static_cast<unsigned>(2*PI__);
-            if(buildup > 1) --buildup, angle -= angle.sign();
-        }
-        Int::Str copy(angle.str());
-        if(copy[0] == '+' || copy[0] == '-')
-            copy.erase(0, 1);
-        std::stringstream ss(copy);
-        long long int topass(0);
-        ss >> topass;
-        return ::sin(topass*angle.sign());
-    }
-    double Cos(const Int& angle)
-        {return Sin(angle + PI__/2 + 1);}
-    double Tan(const Int& angle)
-        {return Sin(angle)/Cos(angle);}
-    double Csc(const Int& angle)
-        {return pow(Sin(angle), -1);}
-    double Sec(const Int& angle)
-        {return pow(Cos(angle), -1);}
-    double Cot(const Int& angle)
-        {return pow(Tan(angle), -1);}
+    Int pow(const Int& b, const Int& exp)
+        {return exponentiate(b, exp);}
+    Float powf(const Float& b, const Float& exp)
+        {return exponentiate(b, exp, b.precision());}
+    Int gcd(const Int& a, const Int& b)
+        {return gcd<Int>(a, b);}
     bool Palindrome(const Int& testee){
-        Int::Str test_string(testee.str());
+        Int::str_type test_string(testee.str());
         test_string.erase(0, 1);
         const size_t max_s(test_string.size());
         for(size_t i(0); i < max_s/2; ++i)
@@ -109,35 +28,77 @@ namespace Precision{
                 return false;
         return true;
     }
-    
-    Int Rand(Int seed, Int max){
-        static Int sseed(1), toreturn(sseed);
-        if(seed.sign() >= 0){
-            sseed = seed;
-            toreturn = sseed * Rand();
-        }
-        else if(toreturn > max)
-            toreturn = sseed;
-        toreturn |= toreturn * 2;
-        toreturn <<= 1;
-        toreturn &= toreturn / 2;
-        toreturn <<= 1;
-        toreturn ^= toreturn * 2;
-        toreturn >>= 1;
-        if(sseed % 2 == 1)
-            sseed -= 1;
-        else sseed += 1;
-        toreturn += sseed;
-        sseed |= sseed / 2;
-        sseed <<= 1;
-        sseed &= sseed / 2;
-        sseed >>= 1;
-        sseed ^= sseed / 2;
-        sseed >>= 1;
-        if(sseed > max)
-            sseed.shift(-static_cast<Int::lli>(3*sseed.count_digits()/4));
-        return toreturn;
+
+//Read-only
+    const Int& Random::seed()const{return m_seed;}
+    Int Random::min()const{return 0;}
+    const Int& Random::max()const{return m_max;}
+    const Int& Random::and1()const{return m_and1;}
+    const Int& Random::and2()const{return m_and2;}
+    const Int& Random::and3()const{return m_and3;}
+    const Int& Random::and4()const{return m_and4;}
+    Int::lli Random::order_of_entropy()const{return m_order_of_entropy;}
+    size_t Random::push1()const{return m_push1;}
+    size_t Random::push2()const{return m_push2;}
+    size_t Random::push3()const{return m_push3;}
+//Retrive and/or change state
+    Int Random::operator()(){
+    //Algorithm is a modified form of the SFMT as described in this paper:
+    // http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/ARTICLES/sfmt.pdf
+        Int::str_type image(m_seed.str());
+        const size_t quad(image.size()/4);
+        Int
+            word_1(image.substr(0, quad)), word_2(image.substr(quad+1, quad)),
+            word_3(image.substr(2*quad+1, quad)), word_4(image.substr(3*quad+1))
+        ;
+        m_seed = ((
+            ( (m_seed << m_push1) ^ m_seed )        //wA
+            ^ ( ((word_1 >> m_push2) & m_and1)
+                ^ ((word_2 >> m_push2) & m_and2)
+                ^ ((word_3 >> m_push2) & m_and3)
+                ^ ((word_4 >> m_push2) & m_and4) )  //wB
+            ^ (m_seed >> m_push1)                   //wC
+            ^ (m_seed << m_push3)                   //wD
+        ) >> ((quad*4)/3));
+        image = m_seed.str().substr(1);
+        std::reverse(image.begin(), image.end());
+        m_seed = Int(image);
+        if(m_seed >= m_max)
+            m_seed %= m_max;
+        m_seed.shift(m_order_of_entropy);
+        return m_seed;
     }
+    void Random::discard(){this->operator()();}
+//Change settings
+    void Random::seed(const Int& new_seed){
+        if(new_seed.positive())
+            m_seed = new_seed;
+    }
+    void Random::max(const Int& new_max){
+        if(new_max.positive())
+            m_seed = new_max;
+    }
+    void Random::and1(const Int& a1){m_and1 = a1;}
+    void Random::and2(const Int& a2){m_and1 = a2;}
+    void Random::and3(const Int& a3){m_and1 = a3;}
+    void Random::and4(const Int& a4){m_and1 = a4;}
+    void Random::order_of_entropy(Int::lli ooe){m_order_of_entropy = ooe;}
+    void Random::push1(size_t p1){m_push1 = p1;}
+    void Random::push2(size_t p2){m_push1 = p2;}
+    void Random::push3(size_t p3){m_push1 = p3;}
+//Constructor
+    Random::Random(
+        const Int& INseed, const Int& INmax, Int::lli INorder_of_entropy,
+        const Int& INand1, const Int& INand2,
+        const Int& INand3, const Int& INand4,
+        size_t INpush1, size_t INpush2, size_t INpush3
+    )
+        : m_seed(INseed.positive() ? INseed : 1)
+        , m_max(INmax.positive() ? INmax : "1E100"_Precision_Int_E)
+        , m_and1(INand1), m_and2(INand2), m_and3(INand3), m_and4(INand4)
+        , m_order_of_entropy(INorder_of_entropy)
+        , m_push1(INpush1), m_push2(INpush2), m_push3(INpush3)
+    {}
 
     Int Fibonacci(size_t* term_holder, size_t term){
         static Int toreturn(1), hold1(1), hold2(0);
@@ -150,55 +111,56 @@ namespace Precision{
         if(term_holder != nullptr) *term_holder = curr_term;
         return toreturn;
     }
+
 }
 
 #include <map>
-const std::map<Precision::Int, std::string>
-    NumberWordBank
-{
-    std::make_pair("0"_Precision_Int, "zero"),
-    std::make_pair("1"_Precision_Int, "one"),
-    std::make_pair("2"_Precision_Int, "two"),
-    std::make_pair("3"_Precision_Int, "three"),
-    std::make_pair("4"_Precision_Int, "four"),
-    std::make_pair("5"_Precision_Int, "five"),
-    std::make_pair("6"_Precision_Int, "six"),
-    std::make_pair("7"_Precision_Int, "seven"),
-    std::make_pair("8"_Precision_Int, "eight"),
-    std::make_pair("9"_Precision_Int, "nine"),
-    std::make_pair("10"_Precision_Int, "ten"),
-    std::make_pair("11"_Precision_Int, "eleven"),
-    std::make_pair("12"_Precision_Int, "twelve"),
-    std::make_pair("13"_Precision_Int, "thirteen"),
-    std::make_pair("14"_Precision_Int, "fourteen"),
-    std::make_pair("15"_Precision_Int, "fifteen"),
-    std::make_pair("16"_Precision_Int, "sixteen"),
-    std::make_pair("17"_Precision_Int, "seventeen"),
-    std::make_pair("18"_Precision_Int, "eighteen"),
-    std::make_pair("19"_Precision_Int, "nineteen"),
-    std::make_pair("20"_Precision_Int, "twenty"),
-    std::make_pair("30"_Precision_Int, "thirty"),
-    std::make_pair("40"_Precision_Int, "forty"),
-    std::make_pair("50"_Precision_Int, "fifty"),
-    std::make_pair("60"_Precision_Int, "sixty"),
-    std::make_pair("70"_Precision_Int, "seventy"),
-    std::make_pair("80"_Precision_Int, "eighty"),
-    std::make_pair("90"_Precision_Int, "ninety"),
-    std::make_pair("1e2"_Precision_Int_E, "hundred"),
-    std::make_pair("1e3"_Precision_Int_E, "thousand"),
-    std::make_pair("1e6"_Precision_Int_E, "million"),
-    std::make_pair("1e9"_Precision_Int_E, "billion"),
-    std::make_pair("1e12"_Precision_Int_E, "trillion"),
-    std::make_pair("1e15"_Precision_Int_E, "quadrillion"),
-    std::make_pair("1e18"_Precision_Int_E, "quintillion"),
-    std::make_pair("1e21"_Precision_Int_E, "sextillion"),
-    std::make_pair("1e24"_Precision_Int_E, "septillion"),
-    std::make_pair("1e27"_Precision_Int_E, "octillion"),
-    std::make_pair("1e30"_Precision_Int_E, "nonillion"),
-    std::make_pair("1e33"_Precision_Int_E, "decillion"),
-};
-const std::string k_and("and ");
-const unsigned k_ten(10), k_thousand(1e3);
+namespace{
+    const std::map<Precision::Int, std::string> NumberWordBank{
+        std::make_pair("0"_Precision_Int, "zero"),
+        std::make_pair("1"_Precision_Int, "one"),
+        std::make_pair("2"_Precision_Int, "two"),
+        std::make_pair("3"_Precision_Int, "three"),
+        std::make_pair("4"_Precision_Int, "four"),
+        std::make_pair("5"_Precision_Int, "five"),
+        std::make_pair("6"_Precision_Int, "six"),
+        std::make_pair("7"_Precision_Int, "seven"),
+        std::make_pair("8"_Precision_Int, "eight"),
+        std::make_pair("9"_Precision_Int, "nine"),
+        std::make_pair("10"_Precision_Int, "ten"),
+        std::make_pair("11"_Precision_Int, "eleven"),
+        std::make_pair("12"_Precision_Int, "twelve"),
+        std::make_pair("13"_Precision_Int, "thirteen"),
+        std::make_pair("14"_Precision_Int, "fourteen"),
+        std::make_pair("15"_Precision_Int, "fifteen"),
+        std::make_pair("16"_Precision_Int, "sixteen"),
+        std::make_pair("17"_Precision_Int, "seventeen"),
+        std::make_pair("18"_Precision_Int, "eighteen"),
+        std::make_pair("19"_Precision_Int, "nineteen"),
+        std::make_pair("20"_Precision_Int, "twenty"),
+        std::make_pair("30"_Precision_Int, "thirty"),
+        std::make_pair("40"_Precision_Int, "forty"),
+        std::make_pair("50"_Precision_Int, "fifty"),
+        std::make_pair("60"_Precision_Int, "sixty"),
+        std::make_pair("70"_Precision_Int, "seventy"),
+        std::make_pair("80"_Precision_Int, "eighty"),
+        std::make_pair("90"_Precision_Int, "ninety"),
+        std::make_pair("1e2"_Precision_Int_E, "hundred"),
+        std::make_pair("1e3"_Precision_Int_E, "thousand"),
+        std::make_pair("1e6"_Precision_Int_E, "million"),
+        std::make_pair("1e9"_Precision_Int_E, "billion"),
+        std::make_pair("1e12"_Precision_Int_E, "trillion"),
+        std::make_pair("1e15"_Precision_Int_E, "quadrillion"),
+        std::make_pair("1e18"_Precision_Int_E, "quintillion"),
+        std::make_pair("1e21"_Precision_Int_E, "sextillion"),
+        std::make_pair("1e24"_Precision_Int_E, "septillion"),
+        std::make_pair("1e27"_Precision_Int_E, "octillion"),
+        std::make_pair("1e30"_Precision_Int_E, "nonillion"),
+        std::make_pair("1e33"_Precision_Int_E, "decillion"),
+    };
+    const std::string k_and("and ");
+    const unsigned k_ten(10), k_thousand(1e3);
+}
 namespace Precision{
     std::string Num_to_Words(Int toconvert){
         std::string toreturn(
@@ -211,10 +173,13 @@ namespace Precision{
             size_t i( toconvert.count_digits() );
         //key1 accesses words of order 10, like "thousand"
         //key2 accesses the single digits words, like "one"
-            Int key1(Pow(k_ten, i-1)), key2(toconvert / key1);
-            
-        //Two digits
-            if(i == 2){
+            Int key1(pow(k_ten, i-1)), key2(toconvert / key1);
+
+        switch(i){
+            case 1: //One digit
+                toreturn += NumberWordBank.at(key2);
+                break;
+            case 2: //Two digits
                 if(toconvert >= 2*k_ten)
                     toreturn
                         += NumberWordBank.at(key2 * k_ten)
@@ -224,12 +189,12 @@ namespace Precision{
                     toreturn += NumberWordBank.at(toconvert);
                     return toreturn;
                 }
-        //Three digits
-            }else if(i == 3){
+                break;
+            case 3: //Three digits
                 toreturn += NumberWordBank.at(key2) + ' ';
                 toreturn += NumberWordBank.at(key1) + ' ';
-        //Four or more digits
-            }else if(i >= 4){
+                break;
+            default:    //Four or more digits
                 key2 = toconvert;
                 key1 = 1;
                 while(key2.count_digits() > 3){
@@ -239,8 +204,8 @@ namespace Precision{
                 
                 toreturn += Num_to_Words(key2) + ' ';
                 toreturn += NumberWordBank.at(key1) + ' ';
-        //One digit
-            }else toreturn += NumberWordBank.at(key2);
+                break;
+        }
         //Stop adding things once toconvert is 0
             if(key1*key2 == toconvert) break;
         //Inserting "and"
@@ -256,29 +221,6 @@ namespace Precision{
         return toreturn;
     }
 //Float
-    Float fPow(const Float& f, Float::Integer s)
-        {return f ^ s;}
-    Float fPow(const Float& f, const Float& s)
-        {return f ^ s;}
-
-    Float ln(const Float& res, size_t prec){
-        const bool inverted(res.magnitude() > 1);
-        Float
-            toreturn(0),
-            _x(inverted ? (1 / res) : res)
-        ;
-        for(size_t i(1); i < (prec ? prec : 100); ++i){
-            toreturn
-                += (i % 2 == 1 ? 1 : -1)
-                * ( (_x - 1) ^ i )
-                / i
-            ;
-        }
-        if(inverted)
-            toreturn.negate();
-        return toreturn;
-    }
-
     Float Remainder(const Float& f, const Float& s)
         {return f.remainder(s);}
 /* Support only after studying mathematical gamma function for factorials
@@ -286,16 +228,17 @@ namespace Precision{
 */
 //Trigonomic functions -- default is radians
     Float Sin(Float angle){
-        while(angle.magnitude() > 2*PI__)
-            angle /= 2*PI__;
-        Float::Str copy(angle.str(15));
+        const Float pi(k_pi_str, angle.precision());
+        while(angle.magnitude() > 2*pi)
+            angle /= 2*pi;
+        Float::str_type copy(angle.str(15));
         std::stringstream ss(copy.substr(1));
         long long int topass(0);
         ss >> topass;
         return ::sin(topass*angle.sign());
     }
     Float Cos(const Float& angle)
-        {return Sin(angle + PI__/2 + 1);}
+        {return Sin(angle + Float(k_pi_str, angle.precision())/2);}
     Float Tan(const Float& angle)
         {return Sin(angle)/Cos(angle);}
     Float Csc(const Float& angle)
@@ -303,7 +246,7 @@ namespace Precision{
     Float Sec(const Float& angle)
         {return 1 / Cos(angle);}
     Float Cot(const Float& angle)
-        {return 1 / Tan(angle);}
+        {return Cos(angle)/Sin(angle);}
     //Note: Consider support for arcFOO functions if
     //   implementation manually calculates values
 }

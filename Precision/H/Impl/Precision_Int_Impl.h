@@ -1,107 +1,27 @@
 #ifndef __PRECISION_INT_IMPL_H
 #define __PRECISION_INT_IMPL_H
 
-#ifdef GENERAL_BASE_
+#define GENERAL_BASE
 
-#include "Precision_INT_BASE.h"
-
-#include <string>
-
-struct _10toChar{
-    char operator()(short s)const
-        {return s + '0';}
-};
-
-struct _Charto10{
-    short operator()(char ch)const
-        {return ch - '0';}
-};
-
-struct Impl_Int_
-    : public INT_BASE_<
-        std::string,
-        char,
-        short,
-        10,
-        '0',
-        _Charto10,
-        _10toChar
-    >
-{
-    Impl_Int_(const std::string& s)
-        : INT_BASE_(s)
-    {}
-    Impl_Int_(const std::string& s, Sign i)
-        : INT_BASE_(s, i)
-    {}
-    Impl_Int_(lli i=0)
-        : INT_BASE_(i)
-    {}
-    Impl_Int_(const INT_BASE_& b)
-        : INT_BASE_(b)
-    {}
-
-    Impl_Int_(const Impl_Int_&)             =default;
-    Impl_Int_(Impl_Int_&&)                  =default;
-    Impl_Int_& operator=(const Impl_Int_&)  =default;
-    Impl_Int_& operator=(Impl_Int_&&)       =default;
-    ~Impl_Int_()                            =default;
-};
-
-inline Impl_Int_ operator+(Impl_Int_ f, const Impl_Int_& s)
-    {return f += s;}
-inline Impl_Int_ operator-(Impl_Int_ f, const Impl_Int_& s)
-    {return f -= s;}
-inline Impl_Int_ operator*(Impl_Int_ f, const Impl_Int_& s)
-    {return f *= s;}
-inline Impl_Int_ operator/(Impl_Int_ f, const Impl_Int_& s)
-    {return f /= s;}
-inline Impl_Int_ operator%(Impl_Int_ f, const Impl_Int_& s)
-    {return f %= s;}
-
-inline Impl_Int_ operator&(Impl_Int_ f, const Impl_Int_& s)
-    {return f &= s;}
-inline Impl_Int_ operator|(Impl_Int_ f, const Impl_Int_& s)
-    {return f |= s;}
-inline Impl_Int_ operator^(Impl_Int_ f, const Impl_Int_& s)
-    {return f ^= s;}
-inline Impl_Int_ operator>>(Impl_Int_ f, const Impl_Int_& s)
-    {return f >>= s;}
-inline Impl_Int_ operator<<(Impl_Int_ f, const Impl_Int_& s)
-    {return f <<= s;}
-
-inline bool operator==(const Impl_Int_& f, const Impl_Int_& s)
-    {return (f.compare(s) == 0);}
-inline bool operator!=(const Impl_Int_& f, const Impl_Int_& s)
-    {return (f.compare(s) != 0);}
-inline bool operator>=(const Impl_Int_& f, const Impl_Int_& s)
-    {return (f.compare(s) >= 0);}
-inline bool operator<=(const Impl_Int_& f, const Impl_Int_& s)
-    {return (f.compare(s) <= 0);}
-inline bool operator>(const Impl_Int_& f, const Impl_Int_& s)
-    {return (f.compare(s) > 0);}
-inline bool operator<(const Impl_Int_& f, const Impl_Int_& s)
-    {return (f.compare(s) < 0);}
-inline bool operator!(const Impl_Int_& t)
-    {return t == 0;}
-
-#else
+#ifndef GENERAL_BASE
 
 #include <string>
+#include <functional>
 
 #include "Shared_Constants.h"
+#include "Precision_Sign_Class.h"
 
 class Impl_Int_{
     public:
 //Type aliases
-        using Str       = std::string;
-        using lli       = long long int;
-        using ld        = long double;
-        using diglist   = std::string;
-        using digit     = char;
-        using digit10   = short;
-        using Sign      = short;
-        using Size_Type = unsigned long long int;
+        using str_type      = std::string;
+        using lli           = long long int;
+        using ld            = long double;
+        using diglist_type  = std::string;
+        using digit_type    = char;
+        using digit10       = short;
+        using sign_type     = Precision::sign_class;
+        using size_type     = size_t;
 //Arithmetic operators
         Impl_Int_& operator+=(const Impl_Int_&);
         Impl_Int_& operator-=(const Impl_Int_&);
@@ -119,13 +39,13 @@ class Impl_Int_{
         Impl_Int_& operator<<=(const Impl_Int_&);
         Impl_Int_& operator>>=(const Impl_Int_&);
 //Read-only functions
-        Sign sign()const;
-        Str str()const;
+        sign_type sign()const;
+        str_type str()const;
     //Set the precision through parameter
-        Str sci_note(Size_Type=k_display_prec)const;
-        Str sci_note_w_spaces(Size_Type=k_display_prec)const;
+        str_type sci_note(size_type=k_display_prec)const;
+        str_type sci_note_w_spaces(size_type=k_display_prec)const;
         Impl_Int_ magnitude()const;
-        Size_Type count_digits()const;
+        size_type count_digits()const;
         short compare(const Impl_Int_&)const;
         Impl_Int_ operator-()const;
         Impl_Int_ operator~()const;
@@ -133,25 +53,41 @@ class Impl_Int_{
         bool odd()const;
 //Other modifiers
         void shift(lli);
-        void sign(Sign);
+        void shift_left(size_type);
+        void shift_right(size_type);
+        void sign(sign_type);
         void negate();
+        void swap(Impl_Int_&);
 //Constructors and destructor
         Impl_Int_(lli=0);
-        Impl_Int_(diglist);
+        Impl_Int_(const diglist_type&);
 
         Impl_Int_(const Impl_Int_&)             =default;
         Impl_Int_(Impl_Int_&&)                  =default;
         Impl_Int_& operator=(const Impl_Int_&)  =default;
         Impl_Int_& operator=(Impl_Int_&&)       =default;
         ~Impl_Int_()                            =default;
+    protected:
+            //Helper divide function to allow modulus and divide
+            //  operators take about the same time to calculate.
+            //  True ~ modulus
+            //  False ~ division
+        Impl_Int_& divide(const Impl_Int_&, bool = false);
+            //Since AND, OR, and XOR implementations differ in
+            //  only the condition, use a helper to centralize
+            //  the implementation.
+        Impl_Int_& bitwise_operation(
+            Impl_Int_,
+            const std::function<bool(bool,bool)>&
+        );
     private:
     //Numbers are stored in reverse, e.g. 190 040 002 would be
     //   stored as 002 040 190. The number is reversed because
     //   the length is varied according to the leftmost side.
-        diglist     m_number;
-        Sign        m_sign;
+        diglist_type     m_number;
+        sign_type   m_sign;
 
-        static constexpr digit      k_0bit  = '0';
+        static constexpr digit_type      k_0bit  = '0';
         static constexpr digit10    k_limit = 10;
 };
 
@@ -175,6 +111,28 @@ bool operator>(const Impl_Int_&, const Impl_Int_&);
 bool operator<(const Impl_Int_&, const Impl_Int_&);
 bool operator!(const Impl_Int_&);
 
-#endif  //End GENERAL_BASE_
+void swap(Impl_Int_&, Impl_Int_&);
+
+#else
+
+#include "Precision_Int_General_Base.h"
+
+#include <string>
+
+struct char_to_short{
+    //short operator()(char c)const{return c-'0';}
+    constexpr short operator()(char c)const{return c-'0';}
+    //constexpr char_to_short() = default;
+};
+struct short_to_char{
+    //char operator()(short c)const{return c+'0';}
+    constexpr char operator()(short c)const{return c+'0';}
+    //constexpr short_to_char() = default;
+};
+
+using Impl_Int_ = Int_General_Base <std::string, char, short, 10, '0', 
+    char_to_short, short_to_char>;
+
+#endif  //End GENERAL_BASE
 
 #endif  //End Include guard

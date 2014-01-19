@@ -15,12 +15,12 @@ Precision::Float operator"" _Precision_Float_E(
     char const *const raw,
     size_t
 ){
-    using Str = Precision::Float::Str;
-    const Str convert(raw);
-    Precision::Float::Size_Type e_pos(convert.find('E'));
-    if(e_pos == Str::npos) e_pos = convert.find('e');
-    if(e_pos == Str::npos)
-        return Precision::Float(Str(raw));
+    using str_type = Precision::Float::str_type;
+    const str_type convert(raw);
+    Precision::Float::size_type e_pos(convert.find('E'));
+    if(e_pos == str_type::npos) e_pos = convert.find('e');
+    if(e_pos == str_type::npos)
+        return Precision::Float(str_type(raw));
 
     Precision::Float toreturn(convert.substr(0, e_pos));
     long long int exp(0);

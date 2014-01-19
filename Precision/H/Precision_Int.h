@@ -9,13 +9,13 @@ namespace Precision{
     class Int{
         public:
     //Type aliases
-            using Str       = Impl_Int_::Str;
+            using str_type       = Impl_Int_::str_type;
             using lli       = Impl_Int_::lli;
             using ld        = Impl_Int_::ld;
-            using diglist   = Impl_Int_::diglist;
-            using digit     = Impl_Int_::digit;
-            using Sign      = Impl_Int_::Sign;
-            using Size_Type = Impl_Int_::Size_Type;
+            using diglist_type   = Impl_Int_::diglist_type;
+            using digit_type     = Impl_Int_::digit_type;
+            using sign_type = Impl_Int_::sign_type;
+            using size_type = Impl_Int_::size_type;
     //Arithmetic operators
             Int& operator+=(const Int& rhs)
                 {return m_base += rhs.m_base, *this;}
@@ -60,8 +60,17 @@ namespace Precision{
                 {return m_base >>= rhs.m_base, *this;}
 
     //Read-only functions
-            Sign sign()const
+            bool is_integer()const
+                {return true;}
+
+            sign_type sign()const
                 {return m_base.sign();}
+
+            bool negative()const
+                {return m_base.sign()<0;}
+
+            bool positive()const
+                {return m_base.sign()>0;}
 
             bool even()const
                 {return m_base.even();}
@@ -69,29 +78,30 @@ namespace Precision{
             bool odd()const
                 {return m_base.odd();}
 
-            Str str()const
+            str_type str()const
                 {return m_base.str();}
 
             //Set the precision through parameter
-            Str sci_note(Size_Type precision=k_display_prec)const
+            str_type sci_note(size_type precision=k_display_prec)const
                 {return m_base.sci_note(precision);}
 
-            Str sci_note_w_spaces(Size_Type precision=k_display_prec)const
+            str_type sci_note_w_spaces(size_type precision=k_display_prec)const
                 {return m_base.sci_note_w_spaces(precision);}
 
             Int magnitude()const
                 {return Int(m_base.magnitude());}
 
-            Size_Type count_digits()const
+            size_type count_digits()const
                 {return m_base.count_digits();}
 
             short compare(const Int& s)const
                 {return m_base.compare(s.m_base);}
 
             Int operator-()const
-                {return Int(m_base*-1);}
+                {return Int(-m_base);}
 
-                //Does not work for ~0
+                //Since there is no limit on the number of bytes,
+                //  ~Int(0) will return 0.
             Int operator~()const
                 {return Int(~m_base);}
 
@@ -100,18 +110,27 @@ namespace Precision{
             void shift(lli tens_exp)
                 {m_base.shift(tens_exp);}
 
-            void sign(Sign newsign)
+            void shift_left(size_type e)
+                {m_base.shift_left(e);}
+
+            void shift_right(size_type e)
+                {m_base.shift_right(e);}
+
+            void sign(sign_type newsign)
                 {m_base.sign(newsign);}
 
             void negate()
                 {m_base.negate();}
+
+            void swap(Int& s)
+                {m_base.swap(s.m_base);}
 
     //Constructors and destructor
             Int(lli inInt = 0)
                 : m_base(inInt)
             {}
 
-            Int(const diglist& inImage)
+            Int(const str_type& inImage)
                 : m_base(inImage)
             {}
 
@@ -187,6 +206,10 @@ namespace Precision{
     inline short Compare(const Int& f, const Int& s)
         {return f.compare(s);}
 }
+
+inline void swap(Precision::Int& a, Precision::Int& b)
+    {a.swap(b);}
+
 Precision::Int operator"" _Precision_Int(char const *const, size_t);
 Precision::Int operator"" _Precision_Int_E(char const *const, size_t);
 Precision::Int operator"" _Precision_Int(unsigned long long);

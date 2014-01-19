@@ -9,12 +9,12 @@ namespace Precision{
         public:
             using Integer   = Impl_Fract_::Integer;
             using Float     = Impl_Fract_::Float;
-            using Str       = Impl_Fract_::Str;
-            using Sign      = Impl_Fract_::Sign;
+            using str_type  = Impl_Fract_::str_type;
+            using sign_type = Impl_Fract_::sign_type;
             using ld        = Impl_Fract_::ld;
             using lli       = Impl_Fract_::lli;
             using ulli      = Impl_Fract_::ulli;
-            using Size_Type = Impl_Fract_::Size_Type;
+            using size_type = Impl_Fract_::size_type;
     //Arithmetic operators
             Fract& operator+=(const Fract& rhs)
                 {return m_base += rhs.m_base, *this;}
@@ -46,6 +46,9 @@ namespace Precision{
             Fract operator-()const
                 {return Fract(-m_base);}
 
+            bool is_integer()const
+                {return m_base.is_integer();}
+
     //Overloaded operators with new meanings
                 //Invert the fraction
             Fract operator~()const
@@ -59,8 +62,14 @@ namespace Precision{
                 {return m_base ^= rhs.m_base, *this;}
                 
     //Read-only functions
-            Sign sign()const
+            sign_type sign()const
                 {return m_base.sign();}
+
+            bool negative()const
+                {return m_base.sign()<0;}
+
+            bool positive()const
+                {return m_base.sign()>0;}
 
             bool even()const
                 {return m_base.even();}
@@ -74,16 +83,16 @@ namespace Precision{
             Integer denominator()const
                 {return m_base.denominator();}
                 
-            Str str()const
+            str_type str()const
                 {return m_base.str();}
                 
-            Str mixed()const
+            str_type mixed()const
                 {return m_base.mixed();}
                 
             Fract magnitude()const
                 {return Fract(m_base.magnitude());}
                 
-            Size_Type precision()const
+            size_type precision()const
                 {return m_base.precision();}
                 
             short compare(const Fract& s)const
@@ -112,17 +121,29 @@ namespace Precision{
                 {return Fract(m_base.inverse());}
                 
     //Other modifiers
-            void precision(Size_Type inPrec)
+            void precision(size_type inPrec)
                 {m_base.precision(inPrec);}
 
             Fract& invert()
                 {return m_base.invert(), *this;}
 
-            void sign(Sign newsign)
+            void sign(sign_type newsign)
                 {m_base.sign(newsign);}
 
             void negate()
                 {m_base.negate();}
+
+            void swap(Fract& s)
+                {m_base.swap(s.m_base);}
+
+            void shift(lli z)
+                {m_base.shift(z);}
+
+            void shift_left(size_type e)
+                {m_base.shift_left(e);}
+
+            void shift_right(size_type e)
+                {m_base.shift_right(e);}
                 
     //Overload cast operators
             explicit operator Integer() const
@@ -132,27 +153,27 @@ namespace Precision{
                 {return static_cast<Float>(m_base);}
                 
     //Constructors and destructor
-            Fract(ld inFP = 0.0, Size_Type inPrec = k_default_prec)
+            Fract(ld inFP = 0.0, size_type inPrec = k_default_prec)
                 : m_base(inFP, inPrec)
             {}
             
             Fract(
-                const Str& inImage,
-                Size_Type inPrec = k_default_prec
+                const str_type& inImage,
+                size_type inPrec = k_default_prec
             )
                 : m_base(inImage, inPrec)
             {}
             
             explicit Fract(
                 const Integer& inWhole,
-                Size_Type inPrec = k_default_prec
+                size_type inPrec = k_default_prec
             )
                 : m_base(inWhole, inPrec)
             {}
             
             explicit Fract(
                 Integer&& inWhole,
-                Size_Type inPrec = k_default_prec
+                size_type inPrec = k_default_prec
             )
                 : m_base(std::move(inWhole), inPrec)
             {}
@@ -168,7 +189,7 @@ namespace Precision{
             explicit Fract(
                 const Integer& inNumer,
                 const Integer& inDenom,
-                Size_Type inPrec = k_default_prec
+                size_type inPrec = k_default_prec
             )
                 : m_base(inNumer, inDenom, inPrec)
             {}
@@ -176,7 +197,7 @@ namespace Precision{
             explicit Fract(
                 Integer&& inNumer,
                 Integer&& inDenom,
-                Size_Type inPrec = k_default_prec
+                size_type inPrec = k_default_prec
             )
                 : m_base(
                     std::move(inNumer),
@@ -244,5 +265,8 @@ namespace Precision{
     inline bool operator!(const Fract& testee)
         {return testee == 0;}
 }
+
+inline void swap(Precision::Fract& a, Precision::Fract& b)
+    {a.swap(b);}
 
 #endif
