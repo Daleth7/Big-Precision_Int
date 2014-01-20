@@ -6,6 +6,12 @@
 #include <sstream>
 #include <utility>
 
+INT_TEMPL_
+constexpr typename INT_INST_::ntodec INT_INST_::m_n10;
+
+INT_TEMPL_
+constexpr typename INT_INST_::decton INT_INST_::m_10n;
+
 //Overloaded operators
 INT_TEMPL_
 INT_INST_& INT_INST_::operator+=(const INT_INST_& rhs){
@@ -17,7 +23,7 @@ INT_INST_& INT_INST_::operator+=(const INT_INST_& rhs){
     while(small.m_number.size() < big.m_number.size())
         small.m_number.push_back(k_0bit);
 
-    digit10 carry(0);
+    digit_10_type carry(0);
     this->m_sign = big.m_sign;
     if(big.m_sign.negative())
         big.m_sign.make_positive(), small.m_sign.negate();
@@ -25,7 +31,7 @@ INT_INST_& INT_INST_::operator+=(const INT_INST_& rhs){
     auto biter(big.m_number.begin());
     auto siter(small.m_number.begin());
     for(; siter != small.m_number.end(); ++biter, ++siter){
-        digit10 catalyst(
+        digit_10_type catalyst(
             m_n10(*biter)
             + m_n10(*siter)*small.m_sign
             + carry
@@ -92,7 +98,7 @@ INT_INST_& INT_INST_::operator*=(const INT_INST_& rhs){
     auto iter(small.m_number.begin());
     for(size_type i(0); i < small.m_number.size(); ++i, ++iter){
         INT_INST_ addend(0);
-        digit10 operand(m_n10(*iter));
+        digit_10_type operand(m_n10(*iter));
         while(operand-- > 0)
             addend += big;
         addend.m_number.insert(0, i, k_0bit);
@@ -346,8 +352,6 @@ INT_TEMPL_
 INT_INST_::Int_General_Base(lli newnumber)
     : m_number(0, k_0bit)
     , m_sign(newnumber < 0 ? -1 : 1)
-    , m_n10(ntodec())
-    , m_10n(decton())
 {
     newnumber *= m_sign;
     while(newnumber > 0){
@@ -362,8 +366,6 @@ INT_TEMPL_
 INT_INST_::Int_General_Base(const str_type& newnumber)
     : m_number(0, k_0bit)
     , m_sign(newnumber[0] == '-' ? -1 : 1)
-    , m_n10(ntodec())
-    , m_10n(decton())
 {
     for(
         size_type i((newnumber[0] == '-' || newnumber[0] == '+') ? 1 : 0);
@@ -388,8 +390,6 @@ INT_TEMPL_
 INT_INST_::Int_General_Base(const diglist_type& n, sign_type s)
     : m_number(n)
     , m_sign(s)
-    , m_n10(ntodec())
-    , m_10n(decton())
 {
     std::reverse(m_number.begin(), m_number.end());
     const digit_type lim = m_10n(k_base);

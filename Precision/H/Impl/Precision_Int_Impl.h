@@ -19,7 +19,7 @@ class Impl_Int_{
         using ld            = long double;
         using diglist_type  = std::string;
         using digit_type    = char;
-        using digit10       = short;
+        using digit_10_type = short;
         using sign_type     = Precision::sign_class;
         using size_type     = size_t;
 //Arithmetic operators
@@ -88,7 +88,7 @@ class Impl_Int_{
         sign_type   m_sign;
 
         static constexpr digit_type      k_0bit  = '0';
-        static constexpr digit10    k_limit = 10;
+        static constexpr digit_10_type    k_limit = 10;
 };
 
 Impl_Int_ operator+(Impl_Int_, const Impl_Int_&);
@@ -119,16 +119,8 @@ void swap(Impl_Int_&, Impl_Int_&);
 
 #include <string>
 
-struct char_to_short{
-    //short operator()(char c)const{return c-'0';}
-    constexpr short operator()(char c)const{return c-'0';}
-    //constexpr char_to_short() = default;
-};
-struct short_to_char{
-    //char operator()(short c)const{return c+'0';}
-    constexpr char operator()(short c)const{return c+'0';}
-    //constexpr short_to_char() = default;
-};
+struct char_to_short{constexpr short operator()(char c)const{return c-'0';}};
+struct short_to_char{constexpr char operator()(short c)const{return c+'0';}};
 
 using Impl_Int_ = Int_General_Base <std::string, char, short, 10, '0', 
     char_to_short, short_to_char>;

@@ -86,7 +86,7 @@ class Int_General_Base{
         using ld            = long double;
         using diglist_type  = Container;
         using digit_type    = Digit_Type;
-        using digit10       = Decimal_Representation;
+        using digit_10_type       = Decimal_Representation;
         using sign_type     = Precision::sign_class;
         using size_type     = size_t;
         using ntodec        = BaseNtoBase10;
@@ -110,6 +110,8 @@ class Int_General_Base{
 //Read-only functions
         const ntodec& converter_Nto10()const;
         const decton& converter_10toN()const;
+//        ntodec converter_Nto10()const;
+//        decton converter_10toN()const;
         sign_type sign()const;
         str_type str()const;
     //Set the precision through parameter
@@ -158,11 +160,11 @@ class Int_General_Base{
     //   the length is varied according to the leftmost side.
         diglist_type         m_number;
         sign_type       m_sign;
-        /*static constexpr*/ ntodec    m_n10;// = ntodec();
-        /*static constexpr*/ decton    m_10n;// = decton();
+        static constexpr ntodec    m_n10 {};
+        static constexpr decton    m_10n {};
 
         static constexpr digit_type      k_0bit  = _0;
-        static constexpr digit10    k_base = Base;
+        static constexpr digit_10_type    k_base = Base;
 };
 
 INT_TEMPL_
