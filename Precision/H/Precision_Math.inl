@@ -15,18 +15,23 @@ namespace Precision{
         return toreturn;
     }
     template <typename OutIter>
-    void Erato_Sieve(unsigned long long int max, OutIter dest){
-        const unsigned long long int init_prime(2);
-        std::vector<bool> flags((max-init_prime), true);
+    void Erato_Sieve(OutIter dest, size_t max){
+        const size_t init_prime(2);
+        static std::vector<bool> flags((max-init_prime), true);
+        static bool already_filled(false);
 
-        size_t init(0);
-        while(init < flags.size()){
-            size_t iter(init), gap(init + init_prime);
+        if(!already_filled && max != flags.size()){
+            flags.resize(max);
+            size_t init(0);
+            while(init < flags.size()){
+                size_t iter(init), gap(init + init_prime);
 
-            while((iter += gap) < flags.size())
-                flags[iter] = false;
-            
-            while(!flags[++init] && init < flags.size());
+                while((iter += gap) < flags.size())
+                    flags[iter] = false;
+                
+                while(!flags[++init] && init < flags.size());
+            }
+            already_filled = true;
         }
         for(size_t i(0); i < flags.size(); ++i){
             if(flags[i])
